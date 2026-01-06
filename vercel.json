@@ -1,9 +1,32 @@
 {
   "rewrites": [
-    { "source": "/users(.*)", "destination": "/backend/main.py" },
-    { "source": "/food(.*)", "destination": "/backend/main.py" },
-    { "source": "/vendors(.*)", "destination": "/backend/main.py" },
-    { "source": "/uploads/(.*)", "destination": "/backend/main.py" },
-    { "source": "/(.*)", "destination": "/frontend/$1" }
+    {
+      "source": "/users(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/auth(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/food(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/vendors(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/docs",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
   ]
 }
