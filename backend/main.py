@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from fastapi.staticfiles import StaticFiles
 import os
@@ -44,3 +45,7 @@ app.add_middleware(
 app.include_router(user.router)
 app.include_router(food.router)
 app.include_router(vendor.router)
+
+@app.get("/")
+def read_root():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
