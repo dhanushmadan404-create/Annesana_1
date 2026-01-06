@@ -1,4 +1,4 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "http://127.0.0.1:8000" : "";
+const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
 // ---------------- PAGE LOAD ----------------
 /* document.addEventListener("DOMContentLoaded", () => {
    getCurrentLocation(); 
@@ -172,7 +172,7 @@ document.getElementById("vendorRegistration").addEventListener("submit", async (
   formData.append("user_id", user);
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/vendors", {
+    const res = await fetch("/vendors", {
       method: "POST",
       body: formData
     });
@@ -240,4 +240,5 @@ foodDataList.forEach(async (foodItem) => {
     alert("Upload failed ❌");
   }
 });
+
 

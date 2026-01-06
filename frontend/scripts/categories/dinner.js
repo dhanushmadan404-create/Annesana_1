@@ -1,7 +1,7 @@
 const API_URL =
   window.location.hostname === "127.0.0.1" ||
   window.location.hostname === "localhost"
-    ? "http://127.0.0.1:8000"
+    ? ""
     : "";
 
 const category = "dinner";
@@ -56,3 +56,4 @@ function foodloc(food_id) {
 
   window.location.href = `/pages/map.html?food_id=${food_id}`;
 }
+

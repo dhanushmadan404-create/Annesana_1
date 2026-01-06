@@ -1,4 +1,4 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "http://127.0.0.1:8000" : "";
+const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
 let user = { name: "Guest", email: "guest@example.com" };
 try {
   user = JSON.parse(localStorage.getItem("user"));
@@ -109,3 +109,4 @@ document.querySelector("a[href='./registration.html']").addEventListener("click"
   localStorage.clear();
   window.location.href = "./login.html";
 });
+

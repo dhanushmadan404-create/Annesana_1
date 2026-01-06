@@ -1,4 +1,4 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "http://127.0.0.1:8000" : "";
+const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
 
 let list = [];
 let menu = document.querySelector(".menu-list");
@@ -150,3 +150,4 @@ document.getElementById("vendorEditForm").addEventListener("submit", async (e) =
         alert("Update failed: " + err.message);
     }
 });
+

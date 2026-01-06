@@ -5,7 +5,7 @@ const TimeStatus = document.getElementById("timeStatus");
 const food_container = document.getElementById("food_container");
 
 // Replace with your actual API URL
-let API = "http://127.0.0.1:8000";
+let API = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -68,4 +68,5 @@ function logout() {
   localStorage.removeItem("vendor_details");
   window.location.href = "./login.html"; // navigate to login page
 }
+
 

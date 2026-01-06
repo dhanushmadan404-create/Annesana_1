@@ -84,7 +84,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   formData.append("role", role);
   formData.append("image", image);
 
-  const res = await fetch("http://127.0.0.1:8000/users", {
+  const res = await fetch("/users", {
     method: "POST",
     body: formData
   });
@@ -126,7 +126,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   }
 
   ///
-  const res = await fetch("http://127.0.0.1:8000/users/login", {
+  const res = await fetch("/users/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -150,7 +150,7 @@ else if (data.role === "admin") {
 else if (data.role === "vendor") {
   try {
     const res = await fetch(
-      `http://127.0.0.1:8000/vendors/check/${data.user_id}`
+      `/vendors/check/${data.user_id}`
     );
 
     if (!res.ok) throw new Error("Vendor check failed");
@@ -169,3 +169,4 @@ else if (data.role === "vendor") {
   }
 }
 });
+
