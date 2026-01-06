@@ -1,0 +1,381 @@
+/* =========================
+   Header & Home Page Styles
+   (Standalone – No theme.css)
+   ========================= */
+
+/* Header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Header Container */
+.header_container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo */
+header .logo {
+  height: 90px;
+  border-radius: 50px;
+  transition: transform 0.3s ease;
+  background: transparent;
+}
+
+header .logo:hover {
+  transform: scale(1.05);
+}
+
+header .logo.location {
+  height: 70px;
+  margin-left: 12px;
+  opacity: 0.9;
+}
+
+header .logo.location:hover {
+  opacity: 1;
+  transform: rotate(5deg);
+}
+
+/* Right Side */
+.right-align {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Header Buttons */
+#profile,
+#login {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+
+#profile {
+  background-color: transparent;
+  color: #111827;
+}
+
+#profile:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#login {
+  background-color: #ff6f00;
+  color: white;
+  text-decoration: none;
+}
+
+#login:hover {
+  background-color: #e65100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Main */
+main {
+  flex: 1;
+  padding: 32px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Trending Section */
+.trending-section {
+  margin-bottom: 48px;
+}
+
+.trending-section h2 {
+  font-size: 28px;
+  color: #111827;
+  margin-bottom: 20px;
+  position: relative;
+  display: inline-block;
+}
+
+.trending-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 50%;
+  height: 3px;
+  background-color: #ff6f00;
+  border-radius: 2px;
+}
+
+/* Trending Products */
+.trending_prod {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+/* Product Card */
+.prod_container {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 100%;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.prod_container:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.prod_container img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.prod_container:hover img {
+  transform: scale(1.05);
+}
+
+.prod_container b {
+  padding: 12px;
+  font-size: 15px;
+  color: #111827;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Categories Section */
+.categories {
+  margin-bottom: auto;
+}
+
+.category-title {
+  font-size: 20px;
+  margin-bottom: 40px;
+  font-weight: 700;
+}
+
+/* Category Grid */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 25px;
+}
+
+/* Category Card */
+.category-card {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.category-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: #000;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4),
+              0 25px 50px rgba(0, 0, 0, 0.1);
+}
+
+.category-card img {
+  width: 140px;
+  height: 140px;
+  margin-bottom: 15px;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.5s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.category-card:hover img {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.category-card span {
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+  color: #111827;
+}
+
+/* Footer */
+footer {
+  background-color: gold;
+  padding: 27px;
+  text-align: center;
+  margin-top: auto;
+}
+
+footer small {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+/* =========================
+   EXTRA RESPONSIVE SUPPORT
+   (ADD ONLY – SAFE OVERRIDES)
+   ========================= */
+
+/* ---------- Large Tablets (≤ 1024px) ---------- */
+@media (max-width: 1024px) {
+  header .logo {
+    height: 80px;
+  }
+
+  main {
+    padding: 28px 14px;
+  }
+
+  .trending-section h2 {
+    font-size: 24px;
+  }
+
+  .category-grid {
+    gap: 20px;
+  }
+}
+
+/* ---------- Tablets (≤ 768px) ---------- */
+@media (max-width: 768px) {
+  header .logo {
+    height: 70px;
+  }
+
+  header .logo.location {
+    height: 55px;
+  }
+
+  .header_container {
+    justify-content: center;
+  }
+
+  .right-align {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  #profile,
+  #login {
+    font-size: 13px;
+    padding: 6px 14px;
+  }
+
+  .trending-section h2 {
+    font-size: 22px;
+  }
+
+  .prod_container img {
+    height: 130px;
+  }
+
+  .category-card img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .category-card span {
+    font-size: 1.05rem;
+  }
+}
+
+/* ---------- Mobile Phones (≤ 480px) ---------- */
+@media (max-width: 480px) {
+  header {
+    padding: 6px 8px;
+  }
+
+  header .logo {
+    height: 60px;
+  }
+
+  header .logo.location {
+    height: 45px;
+  }
+
+  .header_container {
+    gap: 6px;
+  }
+
+  .right-align {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  #profile,
+  #login {
+    width: 100%;
+    text-align: center;
+  }
+
+  main {
+    padding: 20px 10px;
+  }
+
+  .trending-section h2 {
+    font-size: 20px;
+  }
+
+  .trending-section h2::after {
+    width: 70%;
+  }
+
+  .trending_prod {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .prod_container img {
+    height: 120px;
+  }
+
+  .prod_container b {
+    font-size: 14px;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .category-card {
+    padding: 16px;
+  }
+
+  .category-card img {
+    width: 110px;
+    height: 110px;
+  }
+
+  footer {
+    padding: 20px 10px;
+  }
+
+  footer small {
+    font-size: 12px;
+  }
+}

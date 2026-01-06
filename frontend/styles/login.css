@@ -1,0 +1,265 @@
+/* =========================
+   Login / Register Page Styles
+   Standalone CSS (No Variables)
+   ========================= */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #fff7ed; /* soft cream */
+}
+
+/* Header */
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 40px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ff6f00;
+}
+/* Logo */
+header .logo {
+  height: 90px;
+  border-radius: 50px;
+  transition: transform 0.3s ease;
+  background: transparent;
+}
+
+
+
+/* Main Center */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Form Card */
+.form {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  display: none;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.form.visible {
+  display: flex;
+}
+label[id$="Error"] {
+  color: red;
+  font-size: 13px;
+}
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Heading */
+.form h1 {
+  text-align: center;
+  margin-bottom: 28px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #ff6f00;
+  letter-spacing: 1px;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Inputs & Select */
+input,
+select {
+  width: 100%;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #ff6f00;
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.15);
+}
+
+/* Error Messages */
+label[id$="Error"],
+label[id^="login"] {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-bottom: 12px;
+  min-height: 16px;
+}
+
+/* Buttons */
+button {
+  margin-top: 10px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #ff6f00;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #e65100;
+  transform: translateY(-1px);
+}
+
+/* Switch Link */
+h4 {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+  font-weight: 400;
+}
+
+h4 a {
+  color: #ff6f00;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+h4 a:hover {
+  text-decoration: underline;
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom: 16px;
+}
+
+/* =========================
+   EXTRA RESPONSIVE SUPPORT
+   (ADD ONLY – DO NOT MODIFY ABOVE)
+   ========================= */
+
+/* ---------- Large Tablets (≤ 1024px) ---------- */
+@media (max-width: 1024px) {
+  header .logo {
+    height: 80px;
+  }
+
+  .form {
+    max-width: 380px;
+    padding: 36px;
+  }
+}
+
+/* ---------- Tablets & Small Screens (≤ 768px) ---------- */
+@media (max-width: 768px) {
+  body {
+    justify-content: flex-start;
+    padding-top: 120px;
+  }
+
+  header {
+    position: fixed;
+    background-color: #fff7ed;
+    z-index: 1000;
+  }
+
+  main {
+    padding: 30px 20px;
+  }
+
+  .form {
+    max-width: 360px;
+    padding: 32px 26px;
+  }
+
+  .form h1 {
+    font-size: 24px;
+  }
+}
+
+/* ---------- Mobile Phones (≤ 480px) ---------- */
+@media (max-width: 480px) {
+  body {
+    padding-top: 100px;
+  }
+
+  header .logo {
+    height: 65px;
+  }
+
+  .form {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .form h1 {
+    font-size: 22px;
+  }
+
+  input,
+  select {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 11px;
+  }
+
+  h4 {
+    font-size: 12px;
+  }
+}
+
+/* ---------- Small Height Screens (≤ 600px height) ---------- */
+@media (max-height: 600px) {
+  body {
+    justify-content: flex-start;
+  }
+
+  main {
+    padding-top: 140px;
+  }
+}
+
