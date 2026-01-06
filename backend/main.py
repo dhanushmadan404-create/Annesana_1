@@ -23,7 +23,7 @@ origins = [
 ]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+FRONTEND_DIR = BASE_DIR
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 

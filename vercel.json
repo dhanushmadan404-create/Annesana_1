@@ -1,31 +1,29 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": "api/index.py"
     },
     {
       "source": "/users/(.*)",
-      "destination": "/api/index.py"
+      "destination": "api/index.py"
     },
     {
       "source": "/food/(.*)",
-      "destination": "/api/index.py"
+      "destination": "api/index.py"
     },
     {
       "source": "/vendors/(.*)",
-      "destination": "/api/index.py"
+      "destination": "api/index.py"
     },
     {
-      "source": "/",
-      "destination": "/frontend/index.html"
+      "source": "/docs",
+      "destination": "api/index.py"
     },
     {
-      "source": "/(.*)",
-      "destination": "/frontend/$1"
+      "source": "/openapi.json",
+      "destination": "api/index.py"
     }
   ]
 }
