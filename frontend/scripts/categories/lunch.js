@@ -54,3 +54,4 @@ function foodloc(food_id) {
   window.location.href = `/pages/map.html?food_id=${food_id}`;
 }
 
+

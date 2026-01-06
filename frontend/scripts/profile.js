@@ -110,3 +110,4 @@ document.querySelector("a[href='./registration.html']").addEventListener("click"
   window.location.href = "./login.html";
 });
 
+

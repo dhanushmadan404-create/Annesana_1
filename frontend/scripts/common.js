@@ -21,3 +21,4 @@ function checkLoginStatus() {
         if (profileBtn) profileBtn.style.display = "none";
     }
 }
+

@@ -60,3 +60,4 @@ document.getElementById("clear").onclick = () => {
   localStorage.removeItem("foodData");
   location.reload();
 };
+
