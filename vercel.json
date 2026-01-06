@@ -1,29 +1,49 @@
 {
   "version": 2,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/users(.*)",
-      "destination": "/api/index.py"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/food(.*)",
-      "destination": "/api/index.py"
+      "src": "/styles/(.*)",
+      "dest": "/styles/$1"
     },
     {
-      "source": "/vendors(.*)",
-      "destination": "/api/index.py"
+      "src": "/scripts/(.*)",
+      "dest": "/scripts/$1"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "src": "/pages/(.*)",
+      "dest": "/pages/$1"
     },
     {
-      "source": "/docs",
-      "destination": "/api/index.py"
+      "src": "/users(.*)",
+      "dest": "/api/index.py"
     },
     {
-      "source": "/openapi.json",
-      "destination": "/api/index.py"
+      "src": "/food(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/vendors(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/docs",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/openapi.json",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
