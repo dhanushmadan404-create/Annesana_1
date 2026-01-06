@@ -12,13 +12,14 @@ body {
   background-color: #f4f4f6;
   color: #333;
 }
-header .logo{
-  position: absolute;
-  left: 0px;
-  top: 0px ;
-  width: 80px;
-  height: 80px;
+header .logo {
+  height: 90px;
+  border-radius: 50px;
+  transition: transform 0.3s ease;
+  background: transparent;
 }
+
+
 /* Base Container */
 #vendorProfile {
   margin: 40px auto;
