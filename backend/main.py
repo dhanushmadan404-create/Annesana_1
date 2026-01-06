@@ -24,9 +24,10 @@ origins = [
 ]
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FRONTEND_DIR = os.path.join(BASE_DIR, "public")
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+if os.path.exists(FRONTEND_DIR):
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 # app.mount("/static", StaticFiles(directory="/frontend"), name="static")
 # for modify the request before request
