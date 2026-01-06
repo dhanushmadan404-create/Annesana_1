@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/users(.*)", "destination": "/backend/main.py" },
+    { "source": "/food(.*)", "destination": "/backend/main.py" },
+    { "source": "/vendors(.*)", "destination": "/backend/main.py" },
+    { "source": "/uploads/(.*)", "destination": "/backend/main.py" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
+}
