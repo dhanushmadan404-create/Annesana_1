@@ -24,6 +24,14 @@
     {
       "source": "/openapi.json",
       "destination": "api/index.py"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
     }
   ]
 }
