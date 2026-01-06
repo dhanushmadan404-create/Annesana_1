@@ -18,12 +18,24 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/docs",
-      "destination": "/api/index.py"
+      "source": "/assets/(.*)",
+      "destination": "/frontend/assets/$1"
     },
     {
-      "source": "/openapi.json",
-      "destination": "/api/index.py"
+      "source": "/styles/(.*)",
+      "destination": "/frontend/styles/$1"
+    },
+    {
+      "source": "/scripts/(.*)",
+      "destination": "/frontend/scripts/$1"
+    },
+    {
+      "source": "/pages/(.*)",
+      "destination": "/frontend/pages/$1"
+    },
+    {
+      "source": "/",
+      "destination": "/frontend/index.html"
     },
     {
       "source": "/(.*)",
