@@ -2,19 +2,19 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/users(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/food(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/vendors(.*)",
+      "destination": "/api/index.py"
+    },
+    {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/users/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/food/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/vendors/(.*)",
       "destination": "/api/index.py"
     },
     {
@@ -26,12 +26,8 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/favicon.ico",
-      "destination": "/frontend/assets/icons8-a-64.png"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/frontend/$1"
+      "destination": "/public/$1"
     }
   ]
 }
