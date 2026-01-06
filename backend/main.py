@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 # Import all routers
 from router import user, food, vendor
@@ -20,6 +19,4 @@ app.include_router(user.router)
 app.include_router(food.router)
 app.include_router(vendor.router)
 
-@app.get("/api/health")
-def health_check():
-    return {"status": "ok", "message": "Backend is running"}
+# We removed the @app.get("/") because Vercel serves the static index.html directly.
