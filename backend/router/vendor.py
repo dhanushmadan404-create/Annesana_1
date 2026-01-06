@@ -11,6 +11,15 @@ from database import get_db
 
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
+import os
+import tempfile
+try:
+    UPLOAD_DIR = "uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except OSError:
+    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 # ---------------- CREATE VENDOR ----------------
 
 @router.post("/", response_model=fastapi_schemas.VendorResponse)
@@ -23,7 +32,8 @@ def create_vendor(
     db: Session = Depends(get_db)
 ):
     # save image (example)
-    image_path = f"uploads/{cart_image_url.filename}"
+    # save image (example)
+    image_path = os.path.join(UPLOAD_DIR, cart_image_url.filename)
     with open(image_path, "wb") as f:
         f.write(cart_image_url.file.read())
 

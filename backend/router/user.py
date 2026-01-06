@@ -9,8 +9,16 @@ from core.security import verify_password
 import shutil, os
 router = APIRouter(prefix="/users", tags=["Users"])
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+import tempfile
+
+# Handle Vercel's read-only file system
+try:
+    UPLOAD_DIR = "uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except OSError:
+    # Fallback to /tmp (Vercel)
+    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/", response_model=UserResponse)
 def create_user(
@@ -139,7 +147,7 @@ def update_profile(
         user.name = name
 
     if image:
-        file_path = f"uploads/{image.filename}"
+        file_path = os.path.join(UPLOAD_DIR, image.filename)
         with open(file_path, "wb") as f:
             f.write(image.file.read())
         user.image = file_path

@@ -12,6 +12,15 @@ from database import get_db
 
 router = APIRouter(prefix="/foods", tags=["Foods"])
 
+import os
+import tempfile
+try:
+    UPLOAD_DIR = "uploads"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except OSError:
+    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 # ---------------- GET LOCATIONS ----------------
 @router.get("/locations", response_model=List[fastapi_schemas.FoodResponse])
 def get_all_food_locations(db: Session = Depends(get_db)):
@@ -31,7 +40,8 @@ def create_food(
     db: Session = Depends(get_db)
 ):
     # save image
-    image_path = f"uploads/{image.filename}"
+    # save image
+    image_path = os.path.join(UPLOAD_DIR, image.filename)
     with open(image_path, "wb") as f:
         f.write(image.file.read())
 
