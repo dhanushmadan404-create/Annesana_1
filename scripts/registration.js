@@ -172,7 +172,7 @@ document.getElementById("vendorRegistration").addEventListener("submit", async (
   formData.append("user_id", user);
 
   try {
-    const res = await fetch("/vendors", {
+    const res = await fetch(`${API_URL}/vendors`, {
       method: "POST",
       body: formData
     });
@@ -224,7 +224,7 @@ foodDataList.forEach(async (foodItem) => {
     }
 
     // Send POST request
-    const response = await fetch("/api/addFood", {
+    const response = await fetch(`${API_URL}/api/addFood`, {
       method: "POST",
       body: formData
     });

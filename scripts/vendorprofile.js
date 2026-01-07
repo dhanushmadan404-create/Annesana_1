@@ -1,11 +1,14 @@
+const API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://job-4-hope-full-stack.vercel.app';
 // ---------------------- Vendor Profile Script ----------------------
 const profile_image = document.getElementById("DB");
 const vendorName = document.getElementById("vendor_details");
 const TimeStatus = document.getElementById("timeStatus");
 const food_container = document.getElementById("food_container");
 
-// Replace with your actual API URL
-let API = "";
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -14,14 +17,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!vendorId) return window.location.href = "./login.html"; // redirect if not logged in
 
     // 2️⃣ Get user info from "users" table
-    const res = await fetch(`${API}/users/${vendorId}`);
+    const res = await fetch(`${API_URL}/users/${vendorId}`);
     if (!res.ok) throw new Error("Failed to fetch vendor data");
     const data = await res.json();
 
    
 
     // Render profile info
-    profile_image.innerHTML = `<img src="${API}/uploads/${data.image || 'default.png'}" class="card-image"/>`;
+    profile_image.innerHTML = `<img src="${API_URL}/uploads/${data.image || 'default.png'}" class="card-image"/>`;
     vendorName.innerHTML = `
       <h2>${data.name}</h2>
       <p>${data.email}</p>
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     TimeStatus.textContent = `${vendorDetails.opening_time} - ${vendorDetails.closing_time}`;
 
     // 4️⃣ Get foods added by this vendor
-    const foodRes = await fetch(`${API}/foods/vendor/${vendorDetails.vendor_id}`);
+    const foodRes = await fetch(`${API_URL}/foods/vendor/${vendorDetails.vendor_id}`);
     if (!foodRes.ok) throw new Error("Failed to fetch foods");
     const foods = await foodRes.json();
     

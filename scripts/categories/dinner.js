@@ -54,7 +54,7 @@ function foodloc(food_id) {
     return;
   }
 
-  window.location.href = `/pages/map.html?food_id=${food_id}`;
+  window.location.href = `../map.html?food_id=${food_id}`;
 }
 
 

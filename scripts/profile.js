@@ -1,36 +1,40 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
-let user = { name: "Guest", email: "guest@example.com" };
-try {
-  user = JSON.parse(localStorage.getItem("user"));
-} catch (e) {
-  console.error("Invalid user data");
-}
+// let user = { name: "Guest", email: "guest@example.com" };
 
-if (!user || !user.user_id) {
-  // If no user context, maybe redirect or show guest
-  // window.location.href = "/pages/login.html";
-}
-document.addEventListener("DOMContentLoaded", () => {
+
+
+let user_id = localStorage.getItem("user");
+document.addEventListener("DOMContentLoaded", async () => {
+  let API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
+  
   let profile = document.getElementById("profile_details")
+  const res = await fetch(`${API_URL}/users/${user_id}`);
+    if (!res.ok) throw new Error("Failed to fetch foods");
+
+    const user_details = await res.json();
+    localStorage.setItem("user_details", JSON.stringify(user_details));
 
   profile.innerHTML = `
-       <img src="${API_URL}/uploads/${user.image || 'default.png'}" class="profile-image" />
+       <img src="${API_URL}/uploads/${user_details.image || 'default.png'}" class="profile-image" />
         <br />
-        <h2>${user.name}</h2>
-        <p class="about">${user.email}</p>
+        <h2>${user_details.name}</h2>
+        <p class="about">${user_details.email}</p>
     `;
 })
 const editBtn = document.getElementById("editBtn");
 const user_edit = document.getElementById("edit");
 
-editBtn.addEventListener("click", () => {
+editBtn.addEventListener("click", async () => {
+   let user_document = JSON.parse(localStorage.getItem("user_details"));
+
+  let API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
+
   user_edit.innerHTML = `
     <form id="editForm">
       <label>Name</label>
       <input 
         type="text" 
         id="name" 
-        value="${user.name}" 
+        value="${user_document.name}" 
         required
       />
 
@@ -41,7 +45,7 @@ editBtn.addEventListener("click", () => {
         accept="image/*"
       />
 
-      <img src="${API_URL}/${user.image}" width="80" />
+      <img src="${API_URL}/${user_document.image}" width="80" />
 
       <button type="submit">Update</button>
     </form>
@@ -55,8 +59,10 @@ editBtn.addEventListener("click", () => {
 });
 async function submitEditForm(e) {
   e.preventDefault();
+   let user_document = JSON.parse(localStorage.getItem("user_details"));
 
-  const email = JSON.parse(localStorage.getItem("user")).email; // or however you store it
+
+  const email = user_document.email; // or however you store it
   const name = document.getElementById("name").value;
   const image = document.getElementById("image").files[0];
 
@@ -84,11 +90,10 @@ async function submitEditForm(e) {
     }
 
     const updatedUser = await res.json();
+    
     console.log(updatedUser);
 
-    // Update local storage
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    user = updatedUser; // update global var
+  
     location.reload(); // Reload to show changes
 
     alert("Profile updated ✅");
@@ -104,7 +109,7 @@ async function submitEditForm(e) {
 }
 
 // Log out
-document.querySelector("a[href='./registration.html']").addEventListener("click", (e) => {
+document.querySelector("a[href='#']").addEventListener("click", (e) => {
   e.preventDefault();
   localStorage.clear();
   window.location.href = "./login.html";

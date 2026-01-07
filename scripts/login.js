@@ -1,3 +1,7 @@
+const API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://job-4-hope-full-stack.vercel.app';
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
 
@@ -84,7 +88,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   formData.append("role", role);
   formData.append("image", image);
 
-  const res = await fetch("/users", {
+  const res = await fetch(`${API_URL}/users`, {
     method: "POST",
     body: formData
   });
@@ -126,14 +130,14 @@ document.getElementById("check").addEventListener("click", async (e) => {
   }
 
   ///
-  const res = await fetch("/users/login", {
+  const res = await fetch(`${API_URL}/users/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
 
   const data = await res.json();
-  if (!res.ok) return alert(data.detail);
+  if (!res.ok) return alert(`please check you email and password if you not register please register you account ${data.detail}`);
 
   // store ONLY ONE item
 localStorage.setItem(data.role, data.user_id);
@@ -150,7 +154,7 @@ else if (data.role === "admin") {
 else if (data.role === "vendor") {
   try {
     const res = await fetch(
-      `/vendors/check/${data.user_id}`
+      `${API_URL}/vendors/check/${data.user_id}`
     );
 
     if (!res.ok) throw new Error("Vendor check failed");
