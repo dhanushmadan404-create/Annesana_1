@@ -1,4 +1,4 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : 'https://annesana-1-dnv8.vercel.app/api';
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
 
@@ -103,6 +103,7 @@ document.getElementById("append").addEventListener("click", async (e) => {
     alert(data.detail);
   } else {
     alert("Registration successful ✅");
+    // Store details even on register if you want, but usually login follows
     setTimeout(() => location.reload(), 500);
   }
 });
@@ -120,24 +121,21 @@ document.getElementById("check").addEventListener("click", async (e) => {
   emailError.textContent = "";
   passwordError.textContent = "";
 
-
-
   // EMAIL VALIDATION
   if (!email.includes("@gmail.com")) {
     emailError.textContent = "Email must contain @gmail.com";
-
+    return;
   } else if (email.length < 13) {
     emailError.textContent = "Email must be at least 13 characters";
-
+    return;
   }
 
   // PASSWORD VALIDATION
   if (password.length < 6) {
     passwordError.textContent = "Password must be at least 6 characters";
-
+    return;
   }
 
-  ///
   const res = await fetch(`${API_URL}/users/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -145,25 +143,21 @@ document.getElementById("check").addEventListener("click", async (e) => {
   });
 
   const data = await res.json();
-  if (!res.ok) return alert(`please check you email and password if you not register please register you account ${data.detail}`);
+  if (!res.ok) return alert(`Please check your email and password. ${data.detail}`);
 
-  // store ONLY ONE item
-  localStorage.setItem(data.role, data.user_id);
+  // ✅ Store all necessary info
+  localStorage.setItem("user", data.user_id);
+  localStorage.setItem("role", data.role);
+  localStorage.setItem("user_details", JSON.stringify(data));
 
-  // role based navigation
+  // Navigate based on role
   if (data.role === "user") {
     location.href = "../index.html";
-  }
-
-  else if (data.role === "admin") {
+  } else if (data.role === "admin") {
     location.href = "./admin.html";
-  }
-
-  else if (data.role === "vendor") {
+  } else if (data.role === "vendor") {
     try {
-      const res = await fetch(
-        `${API_URL}/vendors/check/${data.user_id}`
-      );
+      const checkRes = await fetch(`${API_URL}/vendors/check/${data.user_id}`);
 
       if (!res.ok) throw new Error("Vendor check failed");
 
