@@ -1,5 +1,7 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
-
+const API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://annesana-1-dnv8.vercel.app/';
 let list = [];
 let menu = document.querySelector(".menu-list");
 let inputList = document.getElementById("list");

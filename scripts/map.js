@@ -1,24 +1,19 @@
-/* =======================
-   API URL
-======================= */
-const API_URL =
-  window.location.hostname === "127.0.0.1" ||
-  window.location.hostname === "localhost"
-    ? ""
-    : "";
 
-/* =======================
-   MAP INIT
-======================= */
+const API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://annesana-1-dnv8.vercel.app/';
+
+  //  MAP INIT
+
 const map = L.map("map").setView([13.0827, 80.2707], 11);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 20,
 }).addTo(map);
 
-/* =======================
-   ICONS
-======================= */
+  //  ICONS
+
 const foodIcon = L.icon({
   iconUrl: "/assets/3448609.png",
   iconSize: [40, 40],
@@ -31,18 +26,16 @@ const userIcon = L.icon({
   iconAnchor: [20, 40],
 });
 
-/* =======================
-   GLOBAL STATE
-======================= */
+  //  GLOBAL STATE
+
 let userLat = null;
 let userLng = null;
 let foodLat = null;
 let foodLng = null;
 let routingControl = null;
 
-/* =======================
-   GET FOOD ID FROM URL
-======================= */
+  //  GET FOOD ID FROM URL
+
 const params = new URLSearchParams(window.location.search);
 const foodId = params.get("food_id");
 
@@ -50,9 +43,8 @@ if (!foodId) {
   alert("Food ID missing");
 }
 
-/* =======================
-   FETCH FOOD LOCATION
-======================= */
+  //  FETCH FOOD LOCATION
+
 async function loadFoodLocation() {
   try {
     const res = await fetch(`${API_URL}/foods/${foodId}`);
@@ -81,9 +73,8 @@ async function loadFoodLocation() {
   }
 }
 
-/* =======================
-   USER LOCATION
-======================= */
+  //  USER LOCATION
+
 function getUserLocation() {
   if (!navigator.geolocation) {
     alert("Geolocation not supported");
@@ -108,9 +99,8 @@ function getUserLocation() {
   );
 }
 
-/* =======================
-   ROUTING
-======================= */
+  //  ROUTING
+
 function tryRouting() {
   if (!userLat || !userLng || !foodLat || !foodLng) return;
 
@@ -131,9 +121,8 @@ function tryRouting() {
   }).addTo(map);
 }
 
-/* =======================
-   INIT
-======================= */
+
+  //  INIT
 getUserLocation();
 loadFoodLocation();
 

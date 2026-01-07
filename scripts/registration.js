@@ -1,9 +1,7 @@
-const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" ? "" : "";
-// ---------------- PAGE LOAD ----------------
-/* document.addEventListener("DOMContentLoaded", () => {
-   getCurrentLocation(); 
-}); */
-
+let API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://annesana-1-dnv8.vercel.app/';
 // ---------------- MENU LIST ----------------
  var ul=document.getElementById("list_container")
         var input=document.getElementById("get")
@@ -72,7 +70,10 @@ map.on("click", (e) => {
 // ---------------- VENDOR REGISTRATION ----------------
 document.getElementById("vendorRegistration").addEventListener("submit", async (e) => {
   e.preventDefault(); // stop page refresh
-
+  let API_URL =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:8000'
+        : 'https://annesana-1-dnv8.vercel.app/';
   // Clear all previous error messages
   document.querySelectorAll(".error-message").forEach(span => span.textContent = "");
 
