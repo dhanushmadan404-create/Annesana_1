@@ -26,25 +26,19 @@ def create_user(
     email: str = Form(...),
     password: str = Form(...),
     role: str = Form(...),
-    image: UploadFile = File(...),
+    image_base64: str = Form(...),
     db: Session = Depends(get_db)
 ):
     # check if email exists
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # save image
-    image_name = f"{datetime.utcnow().timestamp()}_{image.filename}"
-    image_path = os.path.join(UPLOAD_DIR, image_name)
-    with open(image_path, "wb") as f:
-        shutil.copyfileobj(image.file, f)
-
     # create user
     db_user = User(
         name=name,
         email=email,
         role=role,
-        image=image_path,
+        image=image_base64, # Store Base64 directly
         password_hash=hash_password(password),
         created_at=datetime.utcnow()
     )
@@ -135,7 +129,7 @@ def update_profile(data: ProfileUpdate, db: Session = Depends(get_db)):
 def update_profile(
     email: str = Form(...),
     name: str = Form(None),
-    image: UploadFile = File(None),
+    image_base64: str = Form(None),
     db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.email == email).first()
@@ -146,11 +140,8 @@ def update_profile(
     if name:
         user.name = name
 
-    if image:
-        file_path = os.path.join(UPLOAD_DIR, image.filename)
-        with open(file_path, "wb") as f:
-            f.write(image.file.read())
-        user.image = file_path
+    if image_base64:
+        user.image = image_base64
 
     db.commit()
     db.refresh(user)

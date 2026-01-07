@@ -73,7 +73,7 @@
 
         <div class="form-group">
           <label>Shop Location:</label>
-          <div class="location-group">
+          <div  class="location-group">
             <div class="location-icon">Loca📍ion</div>
 
 
@@ -87,27 +87,35 @@
            <span class="error-message" id="imageError"></span>
         </div>
 
-        <div class="form-group">
-          <div class="menu-list" id="menuList"><ul id="list_container">
-                
-            </ul></div>
+      <div class="form-group">
 
-         <div class="menu">
-  <input type="text" name="Todo" id="get"><b  onclick="add()">List it</b>
-</b>
-</div> <span class="error-message" id="menuError"></span>
-        </div>
+        <h4>Menu List</h4>
+  <div class="menu-list">
+    <ul id="list_container">
+      <!-- Dynamic items will appear here -->
+    </ul>
+  </div>
+
+
+  <div class="menu">
+    <input type="text" id="menuName" placeholder="Enter menu item" />
+    <input type="file" id="menuImage" accept="image/*" />
+    <b onclick="addMenuItem()">Add </b>
+  </div>
+
+  <span class="error-message" id="menuError"></span>
+</div>
 
         <div class="operating-hours">
           <h3>Operating Hours:</h3>
           <div class="time-inputs">
             <div class="time-group">
               <label>Opening Time</label>
-              <input type="time" required />
+              <input id="openingTime" type="time" required />
             </div>
             <div class="time-group">
               <label>Closing Time</label>
-              <input type="time" required />
+              <input id="closingTime" type="time" required />
                <span class="error-message" id="closingTimeError"></span>
             </div>
           </div>

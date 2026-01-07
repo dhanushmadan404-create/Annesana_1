@@ -1,7 +1,7 @@
 const API_URL =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:8000'
-        : 'https://job-4-hope-full-stack.vercel.app';
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000'
+    : 'https://job-4-hope-full-stack.vercel.app';
 // ---------------------- Vendor Profile Script ----------------------
 const profile_image = document.getElementById("DB");
 const vendorName = document.getElementById("vendor_details");
@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!res.ok) throw new Error("Failed to fetch vendor data");
     const data = await res.json();
 
-   
+
 
     // Render profile info
-    profile_image.innerHTML = `<img src="${API_URL}/uploads/${data.image || 'default.png'}" class="card-image"/>`;
+    profile_image.innerHTML = `<img src="${data.image || '../assets/default.png'}" class="card-image"/>`;
     vendorName.innerHTML = `
       <h2>${data.name}</h2>
       <p>${data.email}</p>
@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     TimeStatus.textContent = `${vendorDetails.opening_time} - ${vendorDetails.closing_time}`;
 
     // 4️⃣ Get foods added by this vendor
-    const foodRes = await fetch(`${API_URL}/foods/vendor/${vendorDetails.vendor_id}`);
+    const foodRes = await fetch(`${API_URL}/foods/vendor/${vendorDetails.vendor_id}/`);
     if (!foodRes.ok) throw new Error("Failed to fetch foods");
     const foods = await foodRes.json();
-    
+
 
     // Render food cards
     food_container.innerHTML = ""; // clear any existing
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       div.classList.add("review-card");
       div.id = `food-${food.food_id}`;
       div.innerHTML = `
-        <img src="${API_URL}/${food.food_image_url}" class="card-image"/>
+        <img src="${food.food_image_url}" class="card-image"/>
         <div class="card-info">
           <p><strong>${food.food_name}</strong></p>
           <p>${food.category}</p>
@@ -73,4 +73,30 @@ function logout() {
 }
 
 
+async function deleteFood(foodId) {
+  if (!foodId) return;
 
+  // Optional: confirm before deleting
+  const confirmDelete = confirm("Are you sure you want to delete this food?");
+  if (!confirmDelete) return;
+
+  try {
+    const res = await fetch(`/api/food/${foodId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to delete food");
+    }
+
+  location.reload();
+    alert("Food deleted successfully ✅");
+
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting food ❌");
+  }
+}

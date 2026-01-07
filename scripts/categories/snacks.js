@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="image_container">
             <h2 class="food_name">${food.food_name}</h2>
             <img
-              src="${API_URL}/uploads/${food.food_image_url}"
+              src="${food.food_image_url}"
               class="card-image"
             />
           </div>
@@ -52,5 +52,6 @@ function foodloc(food_id) {
 
   window.location.href = `/pages/map.html?food_id=${food_id}`;
 }
+
 
 

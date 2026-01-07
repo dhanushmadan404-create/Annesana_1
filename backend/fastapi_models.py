@@ -28,7 +28,7 @@ class Food(Base):
     food_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"), nullable=False)
     food_name = Column(String(255), nullable=False)
-    food_image_url = Column(String(255))
+    food_image_url = Column(Text)
     category = Column(String(100))
     latitude=Column(Float,nullable=False)
     longitude=Column(Float,nullable=False)
@@ -40,7 +40,7 @@ class Vendor(Base):
     
     vendor_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     phone_number=Column(String,nullable=False)
-    cart_image_url=Column(String,nullable=False)
+    cart_image_url=Column(Text,nullable=False)
     opening_time=Column(Time,nullable=False)
     closing_time=Column(Time,nullable=False)
     user_id = Column(

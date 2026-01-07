@@ -1,132 +1,120 @@
-let API_URL =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:8000'
-        : 'https://annesana-1-dnv8.vercel.app/';
+const API_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000"
+    : "https://annesana-1-dnv8.vercel.app"; // No trailing slash here to avoid //
+
 // ---------------- MENU LIST ----------------
- var ul=document.getElementById("list_container")
-        var input=document.getElementById("get")
-        function add(){
-            // let value=input.value 
-            var list=document.createElement("li")
-            list.innerHTML=input.value+"<button onclick='remove(event)' >Delete</button>"
-            ul.append(list)
-        }
-        function remove(e){
-           e.target.parentElement.remove()
-        }
+const ul = document.getElementById("list_container");
+const input = document.getElementById("menuName");
+const imageInput = document.getElementById("menuImage");
+const menuError = document.getElementById("menuError");
+
+// Utility to convert file to Base64
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+async function addMenuItem() {
+  const name = input?.value.trim();
+  const file = imageInput?.files?.[0];
+
+  menuError.textContent = "";
+
+  if (!name) {
+    menuError.textContent = "Please enter a menu item name.";
+    return;
+  }
+  if (!file) {
+    menuError.textContent = "Please select an image.";
+    return;
+  }
+
+  const base64 = await getBase64(file); // ✅ convert to Base64
+
+  const list = document.createElement("li");
+  list.dataset.imageFile = base64; // store Base64 string
+
+  const imgTag = `<img src="${base64}" class="menu_image" width="50" style="margin-left:10px; object-fit: cover;">`;
+  list.innerHTML = `*${name} ${imgTag} <button type="button" onclick="removeItem(event)">Delete</button>`;
+  ul.appendChild(list);
+
+  input.value = "";
+  imageInput.value = "";
+}
+
+function removeItem(e) {
+  e.target.parentElement.remove();
+}
 
 // ---------------- MAP OPEN / CLOSE ----------------
-let mapCon = document.getElementById("mapContainer");
+const mapCon = document.getElementById("mapContainer");
 
-document.querySelector(".location-group").addEventListener("click", () => {
-  mapCon.style.display = "block"; // show map
+document.querySelector(".location-group")?.addEventListener("click", () => {
+  mapCon.style.display = "block";
 });
-
-document.getElementById("back").addEventListener("click", () => {
-  mapCon.style.display = "none"; // hide map
+document.getElementById("back")?.addEventListener("click", () => {
+  mapCon.style.display = "none";
 });
-
-document.getElementById("save").addEventListener("click", () => {
-  mapCon.style.display = "none"; // hide map
+document.getElementById("save")?.addEventListener("click", () => {
+  mapCon.style.display = "none";
 });
 
 // ---------------- MAP INIT ----------------
 const map = L.map("map").setView([13.0827, 80.2707], 11);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20 }).addTo(map);
 
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 20,
-}).addTo(map);
+const foodIcon = L.icon({ iconUrl: "/assets/3448609.png", iconSize: [40, 40], iconAnchor: [20, 40] });
+let marker = null;
+let latitude = null;
+let longitude = null;
+
+map.on("click", (e) => {
+  if (marker) map.removeLayer(marker);
+  marker = L.marker([e.latlng.lat, e.latlng.lng], { icon: foodIcon }).addTo(map);
+  latitude = e.latlng.lat;
+  longitude = e.latlng.lng;
+});
 
 // ---------------- CURRENT LOCATION ----------------
-document.getElementById("location").addEventListener("click", () => {
-  navigator.geolocation.getCurrentPosition((position) => {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-
-    map.setView([lat, lon], 15); // center map
+document.getElementById("location")?.addEventListener("click", () => {
+  navigator.geolocation.getCurrentPosition((pos) => {
+    map.setView([pos.coords.latitude, pos.coords.longitude], 15);
   });
 });
 
-// ---------------- MAP ICON ----------------
-const foodIcon = L.icon({
-  iconUrl: "/assets/3448609.png",
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
-
-// ---------------- LOCATION SELECT ----------------
-let marker = null;
-let latitude = null;   // ❗ was const (fixed)
-let longitude = null;  // ❗ was const (fixed)
-
-map.on("click", (e) => {
-  if (marker) map.removeLayer(marker); // remove old marker
-
-  marker = L.marker([e.latlng.lat, e.latlng.lng], { icon: foodIcon }).addTo(map);
-
-  latitude = e.latlng.lat;   // save lat
-  longitude = e.latlng.lng;  // save lng
-});
 // ---------------- VENDOR REGISTRATION ----------------
-document.getElementById("vendorRegistration").addEventListener("submit", async (e) => {
-  e.preventDefault(); // stop page refresh
-  let API_URL =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:8000'
-        : 'https://annesana-1-dnv8.vercel.app/';
-  // Clear all previous error messages
-  document.querySelectorAll(".error-message").forEach(span => span.textContent = "");
-
+document.getElementById("vendorRegistration")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
   let hasError = false;
+  document.querySelectorAll(".error-message").forEach(span => (span.textContent = ""));
 
   // --- Food Type ---
   const foodType = document.getElementById("foodType");
   const foodTypeError = document.getElementById("foodTypeError");
-  if (!foodType.value) {
-    foodTypeError.textContent = "Select food type";
-    hasError = true;
-  } else {
-    foodType.value = foodType.value.toLowerCase(); // lowercase transform
-  }
+  if (!foodType?.value) { foodTypeError.textContent = "Select food type"; hasError = true; }
 
   // --- Phone Number ---
   const phone = document.getElementById("number");
   const numberError = document.getElementById("numberError");
-  if (!/^\d{10}$/.test(phone.value)) {
-    numberError.textContent = "Enter a valid 10-digit phone number";
-    hasError = true;
-  }
+  if (!phone?.value || !/^\d{10}$/.test(phone.value)) { numberError.textContent = "Enter a valid 10-digit phone number"; hasError = true; }
 
-  // --- Image ---
+  // --- Vendor Image ---
   const image = document.getElementById("image");
   const imageError = document.getElementById("imageError");
-  if (!image.files.length) {
-    imageError.textContent = "Upload an image";
-    hasError = true;
-  }
+  if (!image?.files?.length) { imageError.textContent = "Upload an image"; hasError = true; }
 
   // --- Menu List ---
-  const menuContainer = document.getElementById("list_container");
-  const menuError = document.getElementById("menuError");
-  if (menuContainer.children.length === 0) {
-    menuError.textContent = "Add at least one menu item";
-    hasError = true;
-  } else {
-    // Check that every menu item has an image (assuming each <li> has data-image)
-    [...menuContainer.children].forEach((item, idx) => {
-      if (!item.dataset.image) {
-        menuError.textContent = `Menu item #${idx + 1} must have an image`;
-        hasError = true;
-      }
-    });
-  }
+  menuError.textContent = "";
+  if (!ul || ul.children.length === 0) { menuError.textContent = "Add at least one menu item"; hasError = true; }
 
   // --- Location ---
   const locationError = document.getElementById("locationError");
-  if (typeof latitude === "undefined" || typeof longitude === "undefined" || latitude === null || longitude === null) {
-    locationError.textContent = "Select shop location";
-    hasError = true;
-  }
+  if (latitude === null || longitude === null) { locationError.textContent = "Select shop location"; hasError = true; }
 
   // --- Operating Hours ---
   const openingTime = document.getElementById("openingTime");
@@ -134,113 +122,65 @@ document.getElementById("vendorRegistration").addEventListener("submit", async (
   const openingTimeError = document.getElementById("openingTimeError");
   const closingTimeError = document.getElementById("closingTimeError");
 
-  if (!openingTime.value) {
-    openingTimeError.textContent = "Select opening time";
-    hasError = true;
-  }
-  if (!closingTime.value) {
-    closingTimeError.textContent = "Select closing time";
-    hasError = true;
-  }
+  if (!openingTime?.value) { openingTimeError.textContent = "Select opening time"; hasError = true; }
+  if (!closingTime?.value) { closingTimeError.textContent = "Select closing time"; hasError = true; }
 
-  if (openingTime.value && closingTime.value) {
-    const [openH, openM] = openingTime.value.split(":").map(Number);
-    const [closeH, closeM] = closingTime.value.split(":").map(Number);
-    const openMinutes = openH * 60 + openM;
-    const closeMinutes = closeH * 60 + closeM;
-
-    if (closeMinutes <= openMinutes) {
-      closingTimeError.textContent = "Closing must be after opening";
-      hasError = true;
-    }
-    if (closeMinutes - openMinutes < 60) {
-      closingTimeError.textContent = "Minimum 1 hour required";
-      hasError = true;
-    }
+  if (openingTime?.value && closingTime?.value) {
+    const [oh, om] = openingTime.value.split(":").map(Number);
+    const [ch, cm] = closingTime.value.split(":").map(Number);
+    const openMinutes = oh * 60 + om;
+    const closeMinutes = ch * 60 + cm;
+    if (closeMinutes <= openMinutes) { closingTimeError.textContent = "Closing must be after opening"; hasError = true; }
+    if (closeMinutes - openMinutes < 60) { closingTimeError.textContent = "Minimum 1 hour required"; hasError = true; }
   }
 
-  if (hasError) return; // Stop submission if any validation fails
+  if (hasError) return;
 
   // ---------------- SEND VENDOR DATA ----------------
-  const user = localStorage.getItem("user")
-   // actually user_id, backend maps it
+  // Get the ID from localStorage - check for 'vendor', 'user', or 'admin'
+  const userId = localStorage.getItem("vendor") || localStorage.getItem("user") || localStorage.getItem("admin");
 
-  const formData = new FormData();
-  formData.append("phone_number", phone.value);
-  formData.append("cart_image_url", image.files[0]);
-  formData.append("opening_time", openTime);
-  formData.append("closing_time", closeTime);
-  formData.append("user_id", user);
+  if (!userId) {
+    alert("You must be logged in to register a vendor");
+    return;
+  }
+
+  const vendorForm = new FormData();
+  vendorForm.append("phone_number", phone.value);
+  vendorForm.append("cart_image_url", await getBase64(image.files[0])); // vendor main image Base64
+  vendorForm.append("opening_time", openingTime.value);
+  vendorForm.append("closing_time", closingTime.value);
+  vendorForm.append("user_id", userId);
 
   try {
-    const res = await fetch(`${API_URL}/vendors`, {
-      method: "POST",
-      body: formData
-    });
-
+    const res = await fetch(`${API_URL}/vendors/`, { method: "POST", body: vendorForm });
     if (!res.ok) {
       const err = await res.json();
       return alert(err.detail || "Registration failed");
     }
-
     const data = await res.json();
-    localStorage.setItem("vendor_details", data);
-// / --- Collect menu items ---
-const menuContainer = document.getElementById("list_container");
+    localStorage.setItem("vendor_details", JSON.stringify(data));
 
-// Transform <li> items to array of {name, image}
-const menuList = [...menuContainer.children].map(item => ({
-  name: item.textContent.trim(),
-  image: item.dataset.image || null // make sure image exists
-}));
+    // --- Menu Items ---
+    for (let li of ul.children) {
+      const base64Image = li.dataset.imageFile;
+      if (!base64Image) continue; // skip if missing
 
-// --- Map to backend format ---
-const foodDataList = menuList.map(food => ({
-  food_name: food.name,
-  category: foodType.value.toLowerCase(), // lowercase
-  latitude,
-  longitude,
-  vendor_id: data.vendor_id, // correct
-  image: food.image
-}));
+      const foodForm = new FormData();
+      foodForm.append("food_name", li.textContent.replace("Delete", "").trim());
+      foodForm.append("category", foodType.value.toLowerCase());
+      foodForm.append("latitude", latitude);
+      foodForm.append("longitude", longitude);
+      foodForm.append("vendor_id", data.vendor_id);
+      foodForm.append("image_base64", base64Image);
 
-console.log(foodDataList);
-
-
-// --- Send each item to backend ---
-foodDataList.forEach(async (foodItem) => {
-
-    const formData = new FormData();
-    formData.append("food_name", foodItem.food_name);
-    formData.append("category", foodItem.category);
-    formData.append("latitude", foodItem.latitude);
-    formData.append("longitude", foodItem.longitude);
-    formData.append("vendor_id", foodItem.vendor_id);
-    
-    // Convert base64 back to Blob if needed for backend file upload
-    if (foodItem.image) {
-      const res = await fetch(foodItem.image);
-      const blob = await res.blob();
-      formData.append("image", blob, `${foodItem.food_name}.png`);
+      await fetch(`${API_URL}/foods/`, { method: "POST", body: foodForm });
     }
-
-    // Send POST request
-    const response = await fetch(`${API_URL}/api/addFood`, {
-      method: "POST",
-      body: formData
-    });
-
-    const result = await response.json();
-    console.log("Item added:", result);
-
-  });
 
     alert("Vendor registration successful ✅");
     location.href = "../pages/vendor-profile.html";
   } catch (err) {
     alert("Upload failed ❌");
+    console.error(err);
   }
 });
-
-
-

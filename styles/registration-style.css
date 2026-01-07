@@ -197,7 +197,8 @@ display: none;
 }
 .menu input {
   padding: 8px 10px;
-  width: 270px;
+  width: 250px;
+  height: 40px;
   border: 2px solid #e85d04;
   border-radius: 4px 0 0 4px;
   outline: none;
@@ -205,18 +206,28 @@ display: none;
   color: #3b1f00;
 }
 .menu b {
+  
   height: 36px;
+  width: 50px;
   background: #e85d04;
   color: #fff;
   border: none;
-  padding: 8px 12px;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
   font-weight: bold;
   transition: 0.3s;
 }
-
-
+.menu_food{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  margin:5px;
+  border: 2px solid #e85d04;
+}
+.menu_image{
+  border-radius: 20px;
+  border: 2px solid #e85d04;
+}
 
 .operating-hours {
   margin-bottom: 20px;

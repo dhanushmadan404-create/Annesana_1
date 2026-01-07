@@ -58,7 +58,37 @@ header .logo:hover {
     height: 70px;
     filter: none;
   }
+/* Header Buttons */
+#profile,
+#login {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
 
+#profile {
+  background-color: transparent;
+  color: #111827;
+}
+
+#profile:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#login {
+  background-color: #ff6f00;
+  color: white;
+  text-decoration: none;
+}
+
+#login:hover {
+  background-color: #e65100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
   /* ================= SECTION TITLE ================= */
 
   .section-title {

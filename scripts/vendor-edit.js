@@ -62,7 +62,7 @@ map.on("click", (e) => {
 let currentVendorData = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  
+
     try {
         // Fetch vendor details
         const res = await fetch(`${API_URL}/vendors/${vendorId}`);
@@ -117,6 +117,16 @@ document.getElementById("vendorEditForm").addEventListener("submit", async (e) =
             throw new Error(err.detail || "Update failed");
         }
 
+        // Utility to convert file to Base64
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         // 2. Add New Foods (POST)
         const menuContainer = document.querySelector(".menu-list");
         const newFoods = [...menuContainer.children].map(item => item.textContent.trim());
@@ -128,16 +138,18 @@ document.getElementById("vendorEditForm").addEventListener("submit", async (e) =
             if (!foodType) return alert("Please select a food type for new foods.");
             if (latitude === null || longitude === null) return alert("Please select a location for new foods.");
 
+            const imageBase64 = await getBase64(imageInput.files[0]);
+
             for (const foodName of newFoods) {
                 const fd = new FormData();
                 fd.append("food_name", foodName);
-                fd.append("category", foodType);
+                fd.append("category", foodType.toLowerCase());
                 fd.append("latitude", latitude);
                 fd.append("longitude", longitude);
                 fd.append("vendor_id", vendorId);
-                fd.append("image", imageInput.files[0]);
+                fd.append("image_base64", imageBase64);
 
-                await fetch(`${API_URL}/foods`, {
+                await fetch(`${API_URL}/foods/`, {
                     method: "POST",
                     body: fd
                 });
