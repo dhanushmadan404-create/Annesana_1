@@ -1,17 +1,25 @@
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
 
-let user_id = localStorage.getItem("user");
+const token = localStorage.getItem("token");
 
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!user_id) {
-    console.log("Not logged in");
+  if (!token) {
+    location.href = "./login.html";
     return;
   }
 
-  let profile = document.getElementById("profile_details")
+  const profile = document.getElementById("profile_details");
   try {
-    const res = await fetch(`${API_URL}/users/${user_id}`);
-    if (!res.ok) throw new Error("Failed to fetch user");
+    // We now use /users/me which is protected by the token
+    const res = await fetch(`${API_URL}/users/me`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      localStorage.clear();
+      location.href = "./login.html";
+      return;
+    }
 
     const user_details = await res.json();
     localStorage.setItem("user_details", JSON.stringify(user_details));
@@ -21,11 +29,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           <br />
           <h2>${user_details.name}</h2>
           <p class="about">${user_details.email}</p>
+          <p><strong>Role:</strong> ${user_details.role}</p>
       `;
   } catch (err) {
-    console.error(err);
+    console.error("Profile load error:", err);
+    alert("Connection error ❌");
   }
-})
+});
 
 const editBtn = document.getElementById("editBtn");
 const user_edit = document.getElementById("edit");
@@ -40,6 +50,7 @@ editBtn.addEventListener("click", () => {
         type="text" 
         id="name" 
         value="${user_document.name || ''}" 
+        minlength="3"
         required
       />
 
@@ -50,16 +61,15 @@ editBtn.addEventListener("click", () => {
         accept="image/*"
       />
 
-      <img src="${user_document.image || ''}" width="80" />
+      <img src="${user_document.image || ''}" width="80" id="preview" style="display: block; margin-top: 10px;"/>
 
-      <button type="submit">Update</button>
+      <button type="submit">Update Profile</button>
     </form>
     `;
 
   document.getElementById("editForm").addEventListener("submit", submitEditForm);
 });
 
-// Utility to convert file to Base64
 function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -71,15 +81,11 @@ function getBase64(file) {
 
 async function submitEditForm(e) {
   e.preventDefault();
-  let user_document = JSON.parse(localStorage.getItem("user_details"));
-
-  const email = user_document.email;
-  const name = document.getElementById("name").value;
+  const name = document.getElementById("name").value.trim();
   const imageFile = document.getElementById("image").files[0];
 
   const formData = new FormData();
-  formData.append("email", email);
-  formData.append("name", name);
+  if (name) formData.append("name", name);
 
   if (imageFile) {
     const image_base64 = await getBase64(imageFile);
@@ -89,12 +95,13 @@ async function submitEditForm(e) {
   try {
     const res = await fetch(`${API_URL}/users/profile`, {
       method: "PUT",
+      headers: { "Authorization": `Bearer ${token}` },
       body: formData
     });
 
     if (!res.ok) {
-      alert("Update failed ❌");
-      return;
+      const errorData = await res.json();
+      throw new Error(errorData.detail || "Update failed");
     }
 
     const updatedUser = await res.json();
@@ -102,8 +109,8 @@ async function submitEditForm(e) {
     alert("Profile updated ✅");
     location.reload();
   } catch (err) {
-    console.error(err);
-    alert("Server error ❌");
+    console.error("Update error:", err);
+    alert(`Update failed ❌: ${err.message}`);
   }
 }
 
@@ -116,4 +123,3 @@ if (logoutBtn) {
     window.location.href = "./login.html";
   });
 }
-

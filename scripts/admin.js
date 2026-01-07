@@ -1,4 +1,5 @@
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
+const token = localStorage.getItem("token");
 
 function logout() {
   localStorage.clear();
@@ -9,8 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("role");
   const userDetails = JSON.parse(localStorage.getItem("user_details") || "{}");
 
-  if (role !== "admin") {
-    alert("Access denied. Admin role required.");
+  if (!token || role !== "admin") {
+    alert("Unauthorized. Admin access required.");
     location.href = "./login.html";
     return;
   }
@@ -23,13 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
   foodData.forEach((item, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td><input value="${item.food_name || ''}"></td>
-      <td><input value="${item.category || ''}"></td>
-      <td><input value="${item.latitude || ''}"></td>
-      <td><input value="${item.longitude || ''}"></td>
-      <td><input value="${item.vendor_id || ''}"></td>
-      <td><input type="file"></td>
-      <td><a href="#" onclick="sendData(${index},this)">Send</a></td>
+      <td><input type="text" value="${item.food_name || ''}" placeholder="Food Name"></td>
+      <td><input type="text" value="${item.category || ''}" placeholder="Category"></td>
+      <td><input type="number" step="any" value="${item.latitude || ''}" placeholder="Lat"></td>
+      <td><input type="number" step="any" value="${item.longitude || ''}" placeholder="Lng"></td>
+      <td><input type="text" value="${item.vendor_id || ''}" placeholder="Vendor ID"></td>
+      <td><input type="file" accept="image/*"></td>
+      <td><button class="send-btn" onclick="sendData(${index},this)">Add Food</button></td>
     `;
     tableBody.appendChild(row);
   });
@@ -38,34 +39,50 @@ document.addEventListener("DOMContentLoaded", () => {
 async function sendData(index, btn) {
   const row = btn.closest("tr");
   const inputs = row.querySelectorAll("input");
-  const image = inputs[5].files[0];
+  const imageFile = inputs[5].files[0];
 
-  const formData = new FormData();
-  formData.append("food_name", inputs[0].value.trim());
-  formData.append("category", inputs[1].value.trim());
-  formData.append("latitude", inputs[2].value.trim());
-  formData.append("longitude", inputs[3].value.trim());
-  formData.append("vendor_id", inputs[4].value.trim());
+  if (!imageFile) return alert("Please select an image first");
 
-  if (image) {
-    // For admin, we still use the old "image" field or "image_base64"
-    // To match our new backend, let's use getBase64 if we want consistency
-    // But backend router/food.py expects image_base64 now.
+  const food_name = inputs[0].value.trim();
+  const category = inputs[1].value.trim();
+  const latitude = inputs[2].value.trim();
+  const longitude = inputs[3].value.trim();
+  const vendor_id = inputs[4].value.trim();
+
+  if (!food_name || !category || !latitude || !longitude || !vendor_id) {
+    return alert("All fields are required");
+  }
+
+  try {
     const reader = new FileReader();
-    reader.readAsDataURL(image);
+    reader.readAsDataURL(imageFile);
     reader.onload = async () => {
+      const formData = new FormData();
+      formData.append("food_name", food_name);
+      formData.append("category", category);
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
+      formData.append("vendor_id", vendor_id);
       formData.append("image_base64", reader.result);
-      const res = await fetch(`${API_URL}/foods`, {
+
+      const res = await fetch(`${API_URL}/foods/`, {
         method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
         body: formData
       });
-      if (!res.ok) return alert("Failed ❌");
-      btn.style.pointerEvents = "none";
-      btn.style.opacity = "0.5";
-      alert("Food added ✅");
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to add food");
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Added ✅";
+      alert("Food item added successfully!");
     };
-  } else {
-    alert("Please select an image");
+  } catch (err) {
+    console.error("Admin add food error:", err);
+    alert(`Error: ${err.message}`);
   }
 }
 
@@ -73,4 +90,3 @@ document.getElementById("clear").onclick = () => {
   localStorage.removeItem("foodData");
   location.reload();
 };
-

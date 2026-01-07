@@ -1,5 +1,5 @@
-from pydantic import BaseModel,ConfigDict
-from datetime import datetime,time
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from datetime import datetime, time
 from typing import Optional
 from enum import Enum
 
@@ -7,20 +7,18 @@ from enum import Enum
 class UserRole(str, Enum):
     user = "user"
     vendor = "vendor"
-    admin="admin"
+    admin = "admin"
 
 # ==================== USER SCHEMAS ====================
 
 class UserBase(BaseModel):
-    email: str
-    name:str
-    image:str
+    email: EmailStr
+    name: str = Field(..., min_length=3, max_length=100)
+    image: Optional[str] = None
     role: UserRole
 
 class UserCreate(UserBase):
-    password: str
-    # created_at should be handled by server, not client
-    # so we generally don't include it here
+    password: str = Field(..., min_length=6)
 
 class UserResponse(UserBase):
     user_id: int
@@ -31,14 +29,12 @@ class LoginResponse(UserResponse):
     access_token: str
     token_type: str = "bearer"
 
-
 # ==================== REVIEW SCHEMAS ====================
 class ReviewBase(BaseModel):
     user_id: int
     food_id: int
-   
-    rating: int
-    review_text: str
+    rating: int = Field(..., ge=1, le=5)
+    review_text: str = Field(..., min_length=1)
 
 class ReviewCreate(ReviewBase):
     pass
@@ -46,17 +42,16 @@ class ReviewCreate(ReviewBase):
 class ReviewResponse(ReviewBase):
     review_id: int
     created_at: Optional[datetime] = None
-    
     model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== FOOD SCHEMAS ====================
 class FoodBase(BaseModel):
-    food_name: str
+    food_name: str = Field(..., min_length=1)
     food_image_url: str
     category: str
-    latitude:float
-    longitude:float
+    latitude: float
+    longitude: float
     vendor_id: int
 
 class FoodCreate(FoodBase):
@@ -64,18 +59,16 @@ class FoodCreate(FoodBase):
 
 class FoodResponse(FoodBase):
     food_id: int
-
-    
     model_config = ConfigDict(from_attributes=True)
 
 
 # ==================== VENDOR SCHEMAS ====================
 class VendorBase(BaseModel):
-    phone_number: str
-    cart_image_url:str
-    opening_time:time
-    closing_time:time
-    user_id:int
+    phone_number: str = Field(..., pattern=r"^\d{10}$")
+    cart_image_url: str
+    opening_time: time
+    closing_time: time
+    user_id: int
 
 class VendorCreate(VendorBase):
     pass
@@ -83,5 +76,3 @@ class VendorCreate(VendorBase):
 class VendorResponse(VendorBase):
     vendor_id: int 
     model_config = ConfigDict(from_attributes=True)
-
-

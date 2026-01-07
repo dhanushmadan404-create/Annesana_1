@@ -8,3 +8,4 @@ psycopg2-binary
 argon2-cffi
 pydantic
 pyjwt
+pydantic[email]

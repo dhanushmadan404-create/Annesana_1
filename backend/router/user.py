@@ -1,17 +1,16 @@
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
-from core.security import hash_password, verify_password, create_access_token
+from core.security import hash_password, verify_password, create_access_token, get_current_user
 from fastapi_models import User
-from fastapi_schemas import UserResponse, LoginResponse
+from fastapi_schemas import UserResponse, LoginResponse, UserCreate
 import os
 import tempfile
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 router = APIRouter(tags=["Users"])
 
-# Support both with and without trailing slash for all user routes
 @router.post("/users", response_model=UserResponse)
 @router.post("/users/", response_model=UserResponse)
 def create_user(
@@ -22,12 +21,12 @@ def create_user(
     image_base64: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    # Check if email is already taking
-    if db.query(User).filter(User.email == email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    # The role in DB is Enum, but string should automatically convert
+    # Manual validation for Form data using Pydantic
     try:
+        # Check if email exists
+        if db.query(User).filter(User.email == email).first():
+            raise HTTPException(status_code=400, detail="Email already registered")
+
         db_user = User(
             name=name,
             email=email,
@@ -42,9 +41,9 @@ def create_user(
         db.refresh(db_user)
         return db_user
     except Exception as e:
-        print(f"❌ Database error: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        if isinstance(e, HTTPException): raise e
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 # --- Login Logic ---
 class LoginData(BaseModel):
@@ -72,6 +71,10 @@ def login(data: LoginData, db: Session = Depends(get_db)):
     user.access_token = access_token
     return user
 
+@router.get("/users/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
@@ -82,20 +85,16 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 @router.put("/users/profile", response_model=UserResponse)
 @router.put("/users/profile/", response_model=UserResponse)
 def update_profile(
-    email: str = Form(...),
     name: str = Form(None),
     image_base64: str = Form(None),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
     if name:
-        user.name = name
+        current_user.name = name
     if image_base64:
-        user.image = image_base64
+        current_user.image = image_base64
 
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(current_user)
+    return current_user
