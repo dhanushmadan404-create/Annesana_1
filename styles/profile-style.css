@@ -77,15 +77,7 @@ header h1 {
   gap: 20px;
 }
 
-.search-bar input {
-  padding: 8px 10px;
-  width: 250px;
-  border: 2px solid #e85d04;
-  border-radius: 4px 0 0 4px;
-  outline: none;
-  background: #fff;
-  color: #3b1f00;
-}
+
 .right-align a {
   color: #3f3f3e;
 }
@@ -93,20 +85,6 @@ header h1 {
   color: #090908;
 }
 
-.search-bar button {
-  background: #e85d04;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 0 4px 4px 0;
-  cursor: pointer;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.search-bar button:hover {
-  background: #d9480f;
-}
 
 /* Navigation */
 nav {
@@ -152,7 +130,7 @@ main {
 .banner {
   object-fit: contain;
   height: 200px;
-  width: 200pxpx;
+  width: 200px;
   margin: 7px 0px 0px 10px;
   /* background: linear-gradient(135deg, #ffb347, #ffcc33); */
   /* border: 2px solid #e85d04; */
@@ -166,7 +144,6 @@ main {
 .profile-image {
   width: 180px;
   height: 180px;
-  background: #ffd966; /* lighter warm tone */
   border-radius: 50%;
   border: 2px solid #e85d04;
   position: relative;
@@ -209,7 +186,75 @@ footer {
   position: relative;
   top: 40px;
 }
+/* edit */
+/* Container styling for the form */
+#editForm {
+  width: 100%;
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+/* Labels */
+#editForm label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Inputs */
+#editForm input[type="text"],
+#editForm input[type="file"] {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+/* Focus effect for inputs */
+#editForm input[type="text"]:focus,
+#editForm input[type="file"]:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* Profile image preview */
+#editForm img {
+  display: block;
+  margin: 0 auto 20px auto;
+  border-radius: 50%;
+  object-fit: cover;
+  width: 80px;
+  height: 80px;
+  border: 2px solid #007BFF;
+}
+
+/* Submit button */
+#editForm button {
+  width: 100%;
+  padding: 12px 0;
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Button hover effect */
+#editForm button:hover {
+  background-color: #0056b3;
+}
 /* =========================
    EXTRA RESPONSIVE SUPPORT
    (ADD ONLY – SAFE OVERRIDES)
@@ -335,5 +380,11 @@ footer {
   footer {
     font-size: 12px;
     padding: 15px;
+  }
+}
+/* Responsive for small screens */
+@media (max-width: 480px) {
+  #editForm {
+    padding: 20px;
   }
 }

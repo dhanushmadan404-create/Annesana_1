@@ -9,6 +9,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-decoration: none;
 }
 
 /* Body */
@@ -130,7 +131,7 @@ label[id^="login"] {
 }
 
 /* Buttons */
-button {
+#append,#check {
   margin-top: 10px;
   padding: 12px;
   font-size: 15px;

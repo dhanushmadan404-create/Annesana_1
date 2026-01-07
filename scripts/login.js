@@ -10,7 +10,7 @@ function visible(showForm, hideForm) {
 }
 
 // ---------------- REGISTER ----------------
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
+document.getElementById("append").addEventListener("click", async (e) => {
   e.preventDefault();
  // get values
   const name = document.getElementById("name").value.trim();
@@ -94,9 +94,12 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   });
 
   const data = await res.json();
-  if (!res.ok) return alert(data.detail);
-
+  if (!res.ok) {
+  alert(data.detail);
+} else {
   alert("Registration successful ✅");
+  location.reload
+}
 });
 
 // ---------------- LOGIN ----------------
@@ -148,7 +151,7 @@ if (data.role === "user") {
 }
 
 else if (data.role === "admin") {
-  location.href = "../pages/admin.html";
+  location.href = "./admin.html";
 }
 
 else if (data.role === "vendor") {
@@ -162,14 +165,14 @@ else if (data.role === "vendor") {
     const result = await res.json();
 
     if (result.exists) {
-      location.href = "../pages/vendor-profile.html";
+      location.href = "./vendor-profile.html";
     } else {
-      location.href = "../pages/registration.html";
+      location.href = "./registration.html";
     }
 
   } catch (err) {
     console.error(err);
-    location.href = "../pages/vendor-registration.html";
+    alert("An error occurred while checking vendor profile.");
   }
 }
 });

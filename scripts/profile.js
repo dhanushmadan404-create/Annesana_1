@@ -15,8 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user_details = await res.json();
     localStorage.setItem("user_details", JSON.stringify(user_details));
 
+    console.log(user_details.image);
   profile.innerHTML = `
-       <img src="${API_URL}/uploads/${user_details.image || 'default.png'}" class="profile-image" />
+  
+       <img src="../backend/uploads/${user_details.image || 'default.png'}" alt="${user_details.name}" class="profile-image" />
         <br />
         <h2>${user_details.name}</h2>
         <p class="about">${user_details.email}</p>
