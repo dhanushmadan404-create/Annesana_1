@@ -1,7 +1,7 @@
 const API_URL =
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://127.0.0.1:8000'
-        : 'https://annesana-1-dnv8.vercel.app/';
+        : 'https://annesana-1-dnv8.vercel.app';
 let list = [];
 let menu = document.querySelector(".menu-list");
 let inputList = document.getElementById("list");
@@ -149,7 +149,7 @@ document.getElementById("vendorEditForm").addEventListener("submit", async (e) =
                 fd.append("vendor_id", vendorId);
                 fd.append("image_base64", imageBase64);
 
-                await fetch(`${API_URL}/foods/`, {
+                await fetch(`${API_URL}/foods`, {
                     method: "POST",
                     body: fd
                 });

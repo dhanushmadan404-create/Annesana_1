@@ -1,7 +1,7 @@
 const API_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : 'https://job-4-hope-full-stack.vercel.app';
+    : 'https://annesana-1-dnv8.vercel.app';
 // ---------------------- Vendor Profile Script ----------------------
 const profile_image = document.getElementById("DB");
 const vendorName = document.getElementById("vendor_details");
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     TimeStatus.textContent = `${vendorDetails.opening_time} - ${vendorDetails.closing_time}`;
 
     // 4️⃣ Get foods added by this vendor
-    const foodRes = await fetch(`${API_URL}/foods/vendor/${vendorDetails.vendor_id}/`);
+    const foodRes = await fetch(`${API_URL}/foods/vendor/${vendorDetails.vendor_id}`);
     if (!foodRes.ok) throw new Error("Failed to fetch foods");
     const foods = await foodRes.json();
 
@@ -81,7 +81,7 @@ async function deleteFood(foodId) {
   if (!confirmDelete) return;
 
   try {
-    const res = await fetch(`/api/food/${foodId}`, {
+    const res = await fetch(`${API_URL}/foods/${foodId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json"
@@ -92,7 +92,7 @@ async function deleteFood(foodId) {
       throw new Error("Failed to delete food");
     }
 
-  location.reload();
+    location.reload();
     alert("Food deleted successfully ✅");
 
   } catch (err) {

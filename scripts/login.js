@@ -1,7 +1,7 @@
 const API_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : 'https://annesana-1-dnv8.vercel.app/';
+    : 'https://annesana-1-dnv8.vercel.app';
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
 
@@ -141,7 +141,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   }
 
   ///
-  const res = await fetch(`${API_URL}/users/login/`, {
+  const res = await fetch(`${API_URL}/users/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -165,7 +165,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   else if (data.role === "vendor") {
     try {
       const res = await fetch(
-        `${API_URL}/vendors/check/${data.user_id}/`
+        `${API_URL}/vendors/check/${data.user_id}`
       );
 
       if (!res.ok) throw new Error("Vendor check failed");

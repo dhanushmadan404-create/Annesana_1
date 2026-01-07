@@ -3,7 +3,7 @@
 const API_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : 'https://annesana-1-dnv8.vercel.app/';
+    : 'https://annesana-1-dnv8.vercel.app';
 
 let user_id = localStorage.getItem("user");
 document.addEventListener("DOMContentLoaded", async () => {
@@ -92,7 +92,7 @@ async function submitEditForm(e) {
 
   try {
     const res = await fetch(
-      `${API_URL}/users/profile/`,
+      `${API_URL}/users/profile`,
       {
         method: "PUT",
         body: formData

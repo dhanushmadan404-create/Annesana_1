@@ -11,7 +11,7 @@
       "destination": "/api/index.py"
     },
     {
-      "source": "/food/(.*)",
+      "source": "/foods/(.*)",
       "destination": "/api/index.py"
     },
     {

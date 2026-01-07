@@ -1,7 +1,7 @@
 const API_URL =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://127.0.0.1:8000"
-    : "https://annesana-1-dnv8.vercel.app"; // No trailing slash here to avoid //
+    : "https://annesana-1-dnv8.vercel.app";
 
 // ---------------- MENU LIST ----------------
 const ul = document.getElementById("list_container");
@@ -153,7 +153,7 @@ document.getElementById("vendorRegistration")?.addEventListener("submit", async 
   vendorForm.append("user_id", userId);
 
   try {
-    const res = await fetch(`${API_URL}/vendors/`, { method: "POST", body: vendorForm });
+    const res = await fetch(`${API_URL}/vendors`, { method: "POST", body: vendorForm });
     if (!res.ok) {
       const err = await res.json();
       return alert(err.detail || "Registration failed");
@@ -174,7 +174,7 @@ document.getElementById("vendorRegistration")?.addEventListener("submit", async 
       foodForm.append("vendor_id", data.vendor_id);
       foodForm.append("image_base64", base64Image);
 
-      await fetch(`${API_URL}/foods/`, { method: "POST", body: foodForm });
+      await fetch(`${API_URL}/foods`, { method: "POST", body: foodForm });
     }
 
     alert("Vendor registration successful ✅");
