@@ -1,29 +1,22 @@
-import sys
 import os
+import sys
 
-# 1. Get the path to 'backend' directory
-# Since this file is in 'api/', backend is in '../backend'
-current_file_path = os.path.abspath(__file__)
-api_dir = os.path.dirname(current_file_path)
-root_dir = os.path.abspath(os.path.join(api_dir, ".."))
-backend_path = os.path.join(root_dir, "backend")
+# Define the root of the project
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BACKEND_DIR = os.path.join(PROJECT_ROOT, "backend")
 
-# 2. Add backend and api to sys.path
-if backend_path not in sys.path:
-    sys.path.append(backend_path)
-if api_dir not in sys.path:
-    sys.path.append(api_dir)
+# Add the project root and backend dir to sys.path
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
-# 3. Import the FastAPI app from backend/main.py
+# Import the app using a standard import
 try:
+    from backend.main import app
+except ImportError:
+    # Fallback for different directory contexts
     from main import app
-except ImportError as e:
-    # If standard import fails, try relative or direct
-    try:
-        from backend.main import app
-    except ImportError:
-        print(f"❌ Critical Error: Could not import 'app' from main.py. Path: {backend_path}")
-        raise e
 
-# 4. Mandatory for Vercel: expose the app variable
+# Vercel needs 'app' to be exposed
 app = app

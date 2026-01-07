@@ -9,3 +9,4 @@ argon2-cffi
 pydantic
 pyjwt
 pydantic[email]
+email-validator
