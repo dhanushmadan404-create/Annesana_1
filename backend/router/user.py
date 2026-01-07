@@ -9,10 +9,11 @@ import os
 import tempfile
 from pydantic import BaseModel, ValidationError
 
-router = APIRouter(tags=["Users"])
-
-@router.post("/users", response_model=UserResponse)
-@router.post("/users/", response_model=UserResponse)
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"]
+)
+@router.post("/", response_model=UserResponse)
 def create_user(
     name: str = Form(...),
     email: str = Form(...),
@@ -50,8 +51,7 @@ class LoginData(BaseModel):
     email: str
     password: str
 
-@router.post("/users/login", response_model=LoginResponse)
-@router.post("/users/login/", response_model=LoginResponse)
+@router.post("/login", response_model=LoginResponse)
 def login(data: LoginData, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:

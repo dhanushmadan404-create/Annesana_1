@@ -81,7 +81,7 @@ document.getElementById("append").addEventListener("click", async (e) => {
     formData.append("role", role);
     formData.append("image_base64", image_base64);
 
-    const res = await fetch(`${API_URL}/users/`, {
+    const res = await fetch(`${API_URL}/users`, {
       method: "POST",
       body: formData
     });
@@ -115,7 +115,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   if (!password) { passwordError.textContent = "Password is required"; return; }
 
   try {
-    const res = await fetch(`${API_URL}/users/login/`, {
+    const res = await fetch(`${API_URL}/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
