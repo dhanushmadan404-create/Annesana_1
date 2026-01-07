@@ -1,7 +1,4 @@
-const API_URL =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? 'http://127.0.0.1:8000'
-        : 'https://annesana-1-dnv8.vercel.app';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
 let list = [];
 let menu = document.querySelector(".menu-list");
 let inputList = document.getElementById("list");
@@ -164,5 +161,6 @@ document.getElementById("vendorEditForm").addEventListener("submit", async (e) =
         alert("Update failed: " + err.message);
     }
 });
+
 
 

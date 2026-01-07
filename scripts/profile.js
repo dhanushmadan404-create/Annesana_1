@@ -1,9 +1,6 @@
 // let user = { name: "Guest", email: "guest@example.com" };
 
-const API_URL =
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:8000'
-    : 'https://annesana-1-dnv8.vercel.app';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
 
 let user_id = localStorage.getItem("user");
 document.addEventListener("DOMContentLoaded", async () => {
@@ -31,9 +28,6 @@ editBtn.addEventListener("click", async () => {
   let user_document = JSON.parse(localStorage.getItem("user_details"));
 
   let API_URL =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://127.0.0.1:8000'
-      : 'https://annesana-1-dnv8.vercel.app/';
   user_edit.innerHTML = `
     <form id="editForm">
       <label>Name</label>
@@ -129,5 +123,6 @@ document.querySelector("a[href='#']").addEventListener("click", (e) => {
   localStorage.clear();
   window.location.href = "./login.html";
 });
+
 
 

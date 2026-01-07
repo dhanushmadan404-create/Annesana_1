@@ -14,9 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include all routers
-app.include_router(user.router)
-app.include_router(food.router)
-app.include_router(vendor.router)
+# Include all routers with a common /api prefix
+app.include_router(user.router, prefix="/api")
+app.include_router(food.router, prefix="/api")
+app.include_router(vendor.router, prefix="/api")
 
 # We removed the @app.get("/") because Vercel serves the static index.html directly.
