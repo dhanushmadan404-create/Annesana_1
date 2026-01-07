@@ -1,7 +1,7 @@
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
+
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
-
   document.getElementById(showForm).classList.add("visible");
   document.getElementById(hideForm).classList.remove("visible");
 }
@@ -19,6 +19,7 @@ function getBase64(file) {
 // ---------------- REGISTER ----------------
 document.getElementById("append").addEventListener("click", async (e) => {
   e.preventDefault();
+
   // get values
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("registrationEmail").value.trim();
@@ -34,25 +35,15 @@ document.getElementById("append").addEventListener("click", async (e) => {
   const imageError = document.getElementById("imageError");
 
   // clear old errors
-  nameError.textContent = "";
-  emailError.textContent = "";
-  passwordError.textContent = "";
-  roleError.textContent = "";
-  imageError.textContent = "";
+  [nameError, emailError, passwordError, roleError, imageError].forEach(el => el && (el.textContent = ""));
 
   let isValid = true;
 
-  // NAME VALIDATION (only letters & min 3)
-  const nameRegex = /^[A-Za-z ]+$/;
   if (name.length < 3) {
     nameError.textContent = "Name must be at least 3 letters";
     isValid = false;
-  } else if (!nameRegex.test(name)) {
-    nameError.textContent = "Name should contain only letters";
-    isValid = false;
   }
 
-  // EMAIL VALIDATION
   if (!email.includes("@gmail.com")) {
     emailError.textContent = "Email must contain @gmail.com";
     isValid = false;
@@ -61,22 +52,16 @@ document.getElementById("append").addEventListener("click", async (e) => {
     isValid = false;
   }
 
-  // PASSWORD VALIDATION
   if (password.length < 6) {
     passwordError.textContent = "Password must be at least 6 characters";
     isValid = false;
-  } else if (password.toLowerCase() === "password") {
-    passwordError.textContent = "Password cannot be 'password'";
-    isValid = false;
   }
 
-  // ROLE VALIDATION
   if (!role) {
     roleError.textContent = "Please select a role";
     isValid = false;
   }
 
-  // IMAGE VALIDATION
   if (!imageFile) {
     imageError.textContent = "Please upload a profile image";
     isValid = false;
@@ -84,27 +69,36 @@ document.getElementById("append").addEventListener("click", async (e) => {
 
   if (!isValid) return;
 
-  const image_base64 = await getBase64(imageFile);
+  try {
+    const image_base64 = await getBase64(imageFile);
 
-  const formData = new FormData();
-  formData.append("name", name);
-  formData.append("email", email);
-  formData.append("password", password);
-  formData.append("role", role);
-  formData.append("image_base64", image_base64);
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("role", role);
+    formData.append("image_base64", image_base64);
 
-  const res = await fetch(`${API_URL}/users/`, {
-    method: "POST",
-    body: formData
-  });
+    console.log("Registering to:", `${API_URL}/users/`);
 
-  const data = await res.json();
-  if (!res.ok) {
-    alert(data.detail);
-  } else {
-    alert("Registration successful ✅");
-    // Store details even on register if you want, but usually login follows
-    setTimeout(() => location.reload(), 500);
+    const res = await fetch(`${API_URL}/users/`, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Handle both FastAPI errors and our custom catch-all errors
+      const errorMsg = data.detail || data.error || "Registration failed";
+      alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+    } else {
+      alert("Registration successful ✅ Please login now.");
+      visible('loginForm', 'registerForm'); // Switch to login form
+    }
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert("Connection error ❌ Check if backend is running.");
   }
 });
 
@@ -117,66 +111,61 @@ document.getElementById("check").addEventListener("click", async (e) => {
   const emailError = document.getElementById("loginEmail");
   const passwordError = document.getElementById("loginPassword");
 
-  // clear previous errors
   emailError.textContent = "";
   passwordError.textContent = "";
 
-  // EMAIL VALIDATION
-  if (!email.includes("@gmail.com")) {
-    emailError.textContent = "Email must contain @gmail.com";
-    return;
-  } else if (email.length < 13) {
-    emailError.textContent = "Email must be at least 13 characters";
+  if (!email.includes("@gmail.com") || email.length < 13) {
+    emailError.textContent = "Invalid email format";
     return;
   }
 
-  // PASSWORD VALIDATION
   if (password.length < 6) {
-    passwordError.textContent = "Password must be at least 6 characters";
+    passwordError.textContent = "Password too short";
     return;
   }
 
-  const res = await fetch(`${API_URL}/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
+  try {
+    const res = await fetch(`${API_URL}/users/login/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-  const data = await res.json();
-  if (!res.ok) return alert(`Please check your email and password. ${data.detail}`);
+    const data = await res.json();
 
-  // ✅ Store all necessary info
-  localStorage.setItem("token", data.access_token);
-  localStorage.setItem("user", data.user_id);
-  localStorage.setItem("role", data.role);
-  localStorage.setItem("user_details", JSON.stringify(data));
+    if (!res.ok) {
+      const errorMsg = data.detail || data.error || "Login failed";
+      return alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+    }
 
-  // Navigate based on role
-  if (data.role === "user") {
-    location.href = "../index.html";
-  } else if (data.role === "admin") {
-    location.href = "./admin.html";
-  } else if (data.role === "vendor") {
-    try {
-      const checkRes = await fetch(`${API_URL}/vendors/check/${data.user_id}`);
+    // ✅ Store all necessary info
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("user", data.user_id);
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("user_details", JSON.stringify(data));
 
-      if (!res.ok) throw new Error("Vendor check failed");
-
-      const result = await res.json();
-
-      if (result.exists) {
-        location.href = "./vendor-profile.html";
-      } else {
+    // Navigate based on role
+    if (data.role === "user") {
+      location.href = "../index.html";
+    } else if (data.role === "admin") {
+      location.href = "./admin.html";
+    } else if (data.role === "vendor") {
+      try {
+        const checkRes = await fetch(`${API_URL}/vendors/check/${data.user_id}/`);
+        if (!checkRes.ok) throw new Error("Vendor check failed");
+        const result = await checkRes.json();
+        if (result.exists) {
+          location.href = "./vendor-profile.html";
+        } else {
+          location.href = "./registration.html";
+        }
+      } catch (err) {
+        console.error("Vendor check error:", err);
         location.href = "./registration.html";
       }
-
-    } catch (err) {
-      console.error(err);
-      location.href = "./registration.html";
     }
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Connection error ❌ Check if backend is running.");
   }
 });
-
-
-
-

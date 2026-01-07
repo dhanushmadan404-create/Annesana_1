@@ -16,7 +16,7 @@ class User(Base):
     created_at = Column(TIMESTAMP, nullable=False)
     password_hash = Column(String, nullable=False)
     name=Column(String,nullable=False)
-    role = Column(Enum(UserRole), nullable=False)
+    role = Column(String, nullable=False) # Changed from Enum to String for better compatibility
     image=Column(Text,nullable=True)
 
 

@@ -1,25 +1,17 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
 from core.security import hash_password, verify_password, create_access_token
 from fastapi_models import User
-from fastapi_schemas import UserCreate, UserResponse, LoginResponse
-import shutil, os
+from fastapi_schemas import UserResponse, LoginResponse
+import os
 import tempfile
+from pydantic import BaseModel
 
-# We'll remove the prefix here and handle it in main.py for more flexibility
 router = APIRouter(tags=["Users"])
 
-# Handle Vercel's read-only file system
-try:
-    UPLOAD_DIR = "uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-except OSError:
-    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Support both with and without trailing slash
+# Support both with and without trailing slash for all user routes
 @router.post("/users", response_model=UserResponse)
 @router.post("/users/", response_model=UserResponse)
 def create_user(
@@ -30,27 +22,31 @@ def create_user(
     image_base64: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    # Check if email is already taking
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    db_user = User(
-        name=name,
-        email=email,
-        role=role,
-        image=image_base64,
-        password_hash=hash_password(password),
-        created_at=datetime.utcnow()
-    )
+    # The role in DB is Enum, but string should automatically convert
+    try:
+        db_user = User(
+            name=name,
+            email=email,
+            role=role, 
+            image=image_base64,
+            password_hash=hash_password(password),
+            created_at=datetime.utcnow()
+        )
 
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except Exception as e:
+        print(f"❌ Database error: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-# --- Login ---
-from pydantic import BaseModel
-from typing import Optional
-
+# --- Login Logic ---
 class LoginData(BaseModel):
     email: str
     password: str
@@ -65,7 +61,14 @@ def login(data: LoginData, db: Session = Depends(get_db)):
     if not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid password")
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.user_id, "role": user.role})
+    # Create token for session
+    access_token = create_access_token(data={
+        "sub": user.email, 
+        "user_id": user.user_id, 
+        "role": str(user.role.value) if hasattr(user.role, 'value') else str(user.role)
+    })
+    
+    # Prepare response
     user.access_token = access_token
     return user
 
