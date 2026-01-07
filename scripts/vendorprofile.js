@@ -1,4 +1,4 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : 'https://annesana-1-dnv8.vercel.app/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
 // ---------------------- Vendor Profile Script ----------------------
 const profile_image = document.getElementById("DB");
 const vendorName = document.getElementById("vendor_details");
@@ -97,4 +97,5 @@ async function deleteFood(foodId) {
     alert("Error deleting food ❌");
   }
 }
+
 

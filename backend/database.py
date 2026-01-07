@@ -4,8 +4,12 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-db_url= os.getenv("DATABASE_URL")
-engine=create_engine( db_url)
+db_url = os.getenv("DATABASE_URL")
+
+if not db_url:
+    raise ValueError("❌ DATABASE_URL is not set. Please add it to your .env file or Vercel Environment Variables.")
+
+engine = create_engine(db_url)
 # binding engine
 SessionLocal=sessionmaker(bind=engine,autoflush=False,autocommit=False)
 

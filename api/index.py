@@ -1,9 +1,20 @@
 import sys
 import os
 
-# Add the 'backend' folder to the system path so we can import from it
-# This tells python that the backend code is located one directory up, then in 'backend/'
-sys.path.append(os.path.join(os.path.dirname(__file__), '../backend'))
+# Get the absolute path of the backend folder
+current_dir = os.path.dirname(__file__)
+backend_path = os.path.abspath(os.path.join(current_dir, "..", "backend"))
+
+# Add the backend folder to sys.path
+if backend_path not in sys.path:
+    sys.path.append(backend_path)
 
 # Import the FastAPI 'app' from main.py
-from main import app
+try:
+    from main import app
+except ImportError as e:
+    print(f"❌ Error importing app: {e}")
+    raise
+
+# Vercel needs the app object to be available as 'app'
+app = app
