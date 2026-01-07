@@ -24,10 +24,12 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     user_id: int
-    created_at: datetime  # response includes created_at
-    # DO NOT include password here
-
+    created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+class LoginResponse(UserResponse):
+    access_token: str
+    token_type: str = "bearer"
 
 
 # ==================== REVIEW SCHEMAS ====================
@@ -69,7 +71,7 @@ class FoodResponse(FoodBase):
 
 # ==================== VENDOR SCHEMAS ====================
 class VendorBase(BaseModel):
-    phone_number: int
+    phone_number: str
     cart_image_url:str
     opening_time:time
     closing_time:time

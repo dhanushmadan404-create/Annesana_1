@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends,UploadFile,File,Form, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from database import get_db
-from core.security import hash_password
+from core.security import hash_password, verify_password, create_access_token
 from fastapi_models import User
-from fastapi_schemas import UserCreate, UserResponse
-from core.security import verify_password
+from fastapi_schemas import UserCreate, UserResponse, LoginResponse
 import shutil, os
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -81,7 +80,7 @@ def get_vendor_by_id(user_id: int, db: Session = Depends(get_db)):
     return user
 
 # login
-@router.post("/login", response_model=UserResponse)
+@router.post("/login", response_model=LoginResponse)
 def login(data: LoginData, db: Session = Depends(get_db)):
 
     user = db.query(User).filter(User.email == data.email).first()
@@ -98,6 +97,11 @@ def login(data: LoginData, db: Session = Depends(get_db)):
             detail="Invalid password"
         )
 
+    # ✅ Create JWT token
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.user_id, "role": user.role})
+
+    # Add token to user object for response (LoginResponse expects it)
+    user.access_token = access_token
     return user
 
 def update_profile(data: ProfileUpdate, db: Session = Depends(get_db)):

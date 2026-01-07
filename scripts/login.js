@@ -146,6 +146,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   if (!res.ok) return alert(`Please check your email and password. ${data.detail}`);
 
   // ✅ Store all necessary info
+  localStorage.setItem("token", data.access_token);
   localStorage.setItem("user", data.user_id);
   localStorage.setItem("role", data.role);
   localStorage.setItem("user_details", JSON.stringify(data));
