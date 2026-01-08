@@ -86,3 +86,10 @@ def root():
 
 from database import init_db
 init_db()
+
+import sys, os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+from router import auth, user, vendor, food
