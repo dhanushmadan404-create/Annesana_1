@@ -23,6 +23,10 @@ from .router import user, food, vendor, auth   # 👈 ADD auth
 app = FastAPI(title="Annesana API")
 
 # ---------------- EXCEPTION HANDLERS ----------------
+@app.get("/")
+def home():
+    return {"message": "Welcome to Annesana API."}
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -73,6 +77,4 @@ app.include_router(vendor.router, prefix="/api")
 def health_check():
     return {"status": "ok", "message": "Backend is running!"}
 
-@app.get("/")
-def home():
-    return {"message": "Welcome to Annesana API."}
+
