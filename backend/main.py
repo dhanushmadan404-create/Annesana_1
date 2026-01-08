@@ -1,32 +1,31 @@
+# backend/main.py
+import os
+import sys
+import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-import os
-import sys
-import logging
 
 # ---------------- LOGGING ----------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ---------------- PATH FIX ----------------
+# Ensure backend folder is in sys.path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 # ---------------- ROUTERS ----------------
-from .router import user, food, vendor, auth   # 👈 ADD auth
+# Use absolute imports to avoid Vercel relative import issues
+from router import user, food, vendor, auth
 
 # ---------------- APP ----------------
 app = FastAPI(title="Annesana API")
 
 # ---------------- EXCEPTION HANDLERS ----------------
-@app.get("/")
-def home():
-    return {"message": "Welcome to Annesana API."}
-
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -55,18 +54,20 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # later restrict
+    allow_origins=["*"],  # later restrict to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---------------- STATIC FILES (IMAGES) ----------------
-# 🔥 THIS FIXES IMAGE NOT SHOWING
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+# Use absolute path to avoid Vercel errors
+upload_dir = os.path.join(current_dir, "uploads")
+os.makedirs(upload_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
 # ---------------- ROUTERS (API PREFIX ONLY) ----------------
-# ✅ Vercel safe
+# ✅ Vercel-safe
 app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(food.router, prefix="/api")
@@ -77,4 +78,7 @@ app.include_router(vendor.router, prefix="/api")
 def health_check():
     return {"status": "ok", "message": "Backend is running!"}
 
-
+# ---------------- ROOT ----------------
+@app.get("/")
+def home():
+    return {"message": "Welcome to Annesana API."}
