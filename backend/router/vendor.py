@@ -7,6 +7,9 @@ import fastapi_models
 import fastapi_schemas
 from database import get_db
 
+from core.security import get_current_user
+from fastapi_models import User
+
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 # ---------------- CREATE VENDOR ----------------
@@ -17,7 +20,8 @@ def create_vendor(
     closing_time: str = Form(...),
     user_id: int = Form(...),
     cart_image_url: str = Form(...),  # <-- Now just a URL
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Create a new vendor with an image URL instead of uploading a file.
@@ -71,7 +75,8 @@ def check_vendor(user_id: int, db: Session = Depends(get_db)):
 def update_vendor(
     vendor_id: int,
     updated_vendor: fastapi_schemas.VendorCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     vendor = db.query(fastapi_models.Vendor).filter(fastapi_models.Vendor.vendor_id == vendor_id).first()
     if not vendor:
@@ -89,7 +94,11 @@ def update_vendor(
 
 # ---------------- DELETE VENDOR ----------------
 @router.delete("/{vendor_id}")
-def delete_vendor(vendor_id: int, db: Session = Depends(get_db)):
+def delete_vendor(
+    vendor_id: int, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     vendor = db.query(fastapi_models.Vendor).filter(fastapi_models.Vendor.vendor_id == vendor_id).first()
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")

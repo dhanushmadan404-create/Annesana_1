@@ -1,22 +1,21 @@
 import os
 import sys
 
-# Define the root of the project
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BACKEND_DIR = os.path.join(PROJECT_ROOT, "backend")
+# Add project root and backend dir to sys.path for robust imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+backend_dir = os.path.join(project_root, "backend")
 
-# Add the project root and backend dir to sys.path
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-if BACKEND_DIR not in sys.path:
-    sys.path.insert(0, BACKEND_DIR)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
 
-# Import the app using a standard import
 try:
     from backend.main import app
 except ImportError:
-    # Fallback for different directory contexts
+    # Fallback for environments where 'backend' is the relative root
     from main import app
 
-# Vercel needs 'app' to be exposed
+# Vercel looks for the variable 'app' in this file
 app = app

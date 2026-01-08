@@ -134,10 +134,11 @@ document.getElementById("vendorRegistration")?.addEventListener("submit", async 
   if (hasError) return;
 
   // ---------------- SEND VENDOR DATA ----------------
-  // Get the ID from localStorage - check for 'vendor', 'user', or 'admin'
-  const userId = localStorage.getItem("vendor") || localStorage.getItem("user") || localStorage.getItem("admin");
+  // Get the ID and token from localStorage
+  const userId = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
 
-  if (!userId) {
+  if (!userId || !token) {
     alert("You must be logged in to register a vendor");
     return;
   }
@@ -150,7 +151,13 @@ document.getElementById("vendorRegistration")?.addEventListener("submit", async 
   vendorForm.append("user_id", userId);
 
   try {
-    const res = await fetch(`${API_URL}/vendors`, { method: "POST", body: vendorForm });
+    const res = await fetch(`${API_URL}/vendors`, {
+      method: "POST",
+      body: vendorForm,
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
     if (!res.ok) {
       const err = await res.json();
       return alert(err.detail || "Registration failed");
@@ -171,7 +178,13 @@ document.getElementById("vendorRegistration")?.addEventListener("submit", async 
       foodForm.append("vendor_id", data.vendor_id);
       foodForm.append("image_base64", base64Image);
 
-      await fetch(`${API_URL}/foods`, { method: "POST", body: foodForm });
+      await fetch(`${API_URL}/foods`, {
+        method: "POST",
+        body: foodForm,
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
     }
 
     alert("Vendor registration successful ✅");

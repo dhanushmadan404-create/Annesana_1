@@ -33,6 +33,10 @@ except OSError:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # ---------------- ROUTER ----------------
+from core.security import get_current_user
+from fastapi_models import User
+
+# ---------------- ROUTER ----------------
 router = APIRouter(prefix="/foods", tags=["Foods"])
 
 # ---------------- GET LOCATIONS ----------------
@@ -49,7 +53,8 @@ def create_food(
     longitude: float = Form(...),
     vendor_id: str = Form(...),  # Accept Base62 string
     image_base64: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     try:
         vendor_id_int = base62_decode(vendor_id)
@@ -107,7 +112,12 @@ def get_food_location(food_id: int, db: Session = Depends(get_db)):
     }
 # ---------------- DELETE FOOD BY VENDOR + FOOD NAME ----------------
 @router.delete("/vendor/{vendor_id}/food/{food_name}")
-def delete_food_by_vendor_and_name(vendor_id: str, food_name: str, db: Session = Depends(get_db)):
+def delete_food_by_vendor_and_name(
+    vendor_id: str, 
+    food_name: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         vendor_id_int = base62_decode(vendor_id)
     except ValueError:
@@ -132,7 +142,11 @@ def delete_food_by_vendor_and_name(vendor_id: str, food_name: str, db: Session =
 
 # ---------------- DELETE ALL FOODS BY VENDOR ID ----------------
 @router.delete("/vendor/{vendor_id}")
-def delete_foods_by_vendor(vendor_id: str, db: Session = Depends(get_db)):
+def delete_foods_by_vendor(
+    vendor_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         vendor_id_int = base62_decode(vendor_id)
     except ValueError:
@@ -151,7 +165,11 @@ def delete_foods_by_vendor(vendor_id: str, db: Session = Depends(get_db)):
 
 # ---------------- DELETE FOOD BY FOOD ID ----------------
 @router.delete("/{food_id}")
-def delete_food_by_id(food_id: str, db: Session = Depends(get_db)):
+def delete_food_by_id(
+    food_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     try:
         food_id_int = base62_decode(food_id)
     except ValueError:
