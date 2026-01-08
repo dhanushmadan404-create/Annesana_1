@@ -5,26 +5,26 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # ---------------- DATABASE URL ----------------
-# Fetch from Render environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")  # Render sets this in the dashboard
+DATABASE_URL = os.getenv("DATABASE_URL")  # must be set in Render/Env
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable not set")
 
-# ---------------- ENGINE ----------------
-engine = create_engine(
-    DATABASE_URL,
-    echo=True,            # Set to True for debug SQL queries
-    pool_pre_ping=True
-)
-
-# ---------------- SESSION ----------------
+# ---------------- ENGINE & SESSION ----------------
+engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# ---------------- BASE ----------------
 Base = declarative_base()
 
-# ---------------- CREATE TABLES ----------------
+# ---------------- DEPENDENCY ----------------
+# This is what your routers expect
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# ---------------- INIT TABLES ----------------
 def init_db():
-    import fastapi_models  # import all models
+    import fastapi_models  # import all your models
     Base.metadata.create_all(bind=engine)

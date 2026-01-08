@@ -62,14 +62,14 @@ app.mount(
 )
 
 # ---------------- ROUTERS ----------------
-from router import auth, user, vendor, food
+from routers import auth, user, vendor, food
 
 API_PREFIX = "/api"
 
-app.include_router(auth.router)
-app.include_router(user.router)
-app.include_router(vendor.router)
-app.include_router(food.router)
+app.include_router(auth.router, prefix=API_PREFIX)
+app.include_router(user.router, prefix=API_PREFIX)
+app.include_router(vendor.router, prefix=API_PREFIX)
+app.include_router(food.router, prefix=API_PREFIX)
 
 # ---------------- HEALTH ----------------
 @app.get("/api/health")
@@ -83,3 +83,6 @@ def health_check():
 @app.get("/")
 def root():
     return {"message": "Welcome to Annesana API"}
+
+from database import init_db
+init_db()
