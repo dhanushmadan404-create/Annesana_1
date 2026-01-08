@@ -26,5 +26,6 @@ def get_db():
 
 # ---------------- INIT TABLES ----------------
 def init_db():
-    import fastapi_models  # import all your models
+     # import all your models here
+    from models import user, food, vendor
     Base.metadata.create_all(bind=engine)
