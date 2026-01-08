@@ -1,6 +1,6 @@
 /**
- * Robust API helper for Annesana
- * Handles 500 errors, non-JSON responses, and network failures.
+ * SUPER ROBUST API helper for Annesana
+ * Prevents [object Object] errors and handles non-JSON / 500 errors gracefully.
  */
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://127.0.0.1:8000/api'
@@ -9,13 +9,11 @@ const API_BASE = (window.location.hostname === 'localhost' || window.location.ho
 async function fetchAPI(endpoint, options = {}) {
     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
 
-    // Set default headers if not provided
     const headers = {
         'Accept': 'application/json',
         ...(options.headers || {})
     };
 
-    // Auto-inject JWT token if it exists
     const token = localStorage.getItem('token');
     if (token && !headers['Authorization']) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -24,44 +22,53 @@ async function fetchAPI(endpoint, options = {}) {
     try {
         const response = await fetch(url, { ...options, headers });
 
-        // Handle non-JSON responses (like Vercel error pages)
         const contentType = response.headers.get('content-type');
         let data;
 
         if (contentType && contentType.includes('application/json')) {
             data = await response.json();
         } else {
-            // If it's not JSON, it's likely a 500 HTML page or 404
+            // Handle HTML/Text errors from Vercel or Server
             const text = await response.text();
-            console.error('Non-JSON response received:', text);
-            throw new Error(`Server returned a non-JSON response (${response.status}). Please check backend logs.`);
+            const cleanText = text.replace(/<[^>]*>/g, '').substring(0, 150).trim();
+            throw new Error(`Server returned non-JSON (${response.status}): ${cleanText || 'Check server logs'}`);
         }
 
         if (!response.ok) {
-            // Extract error message from JSON if possible
-            let errorMsg = 'An unknown error occurred';
+            console.error('API Error Response:', data);
+
+            let message = 'An unknown error occurred';
 
             if (data.detail) {
                 if (typeof data.detail === 'string') {
-                    errorMsg = data.detail;
+                    message = data.detail;
                 } else if (Array.isArray(data.detail)) {
-                    // FastAPI validation errors are an array of objects
-                    errorMsg = data.detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join('; ');
-                } else if (typeof data.detail === 'object') {
-                    errorMsg = JSON.stringify(data.detail);
+                    // Handle FastAPI validation errors
+                    message = data.detail.map(err => {
+                        const loc = err.loc ? err.loc.join('.') : 'field';
+                        return `${loc}: ${err.msg}`;
+                    }).join('; ');
+                } else {
+                    message = JSON.stringify(data.detail);
                 }
+            } else if (data.message || data.error) {
+                const raw = data.message || data.error;
+                message = typeof raw === 'string' ? raw : JSON.stringify(raw);
             } else {
-                errorMsg = data.error || data.message || `Request failed with status ${response.status}`;
+                message = `Request failed with status ${response.status}`;
             }
 
-            throw new Error(errorMsg);
+            throw new Error(message);
         }
 
         return data;
     } catch (error) {
-        if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-            throw new Error('Network error: Is the backend server running?');
+        // Final fallback: Ensure we always have a string message
+        const finalMsg = error.message || String(error);
+        if (finalMsg === '[object Object]') {
+            console.error('Caught hidden object error:', error);
+            throw new Error('An unexpected object error occurred. See console for details.');
         }
-        throw error;
+        throw new Error(finalMsg);
     }
 }

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
@@ -19,11 +19,19 @@ from router import user, food, vendor
 
 app = FastAPI(title="Annesana API")
 
-# Global Exception Handler for 500s
+# 1. Specific handler for FastAPI HTTPExceptions 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
+
+# 2. General handler for unexpected crashes (500s)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     error_msg = str(exc)
-    logger.error(f"Global error caught: {error_msg}", exc_info=True)
+    logger.error(f"CRITICAL ERROR: {error_msg}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={
@@ -33,13 +41,13 @@ async def global_exception_handler(request: Request, exc: Exception):
         }
     )
 
-# Override default validation error handler to be more specific if needed
+# 3. Validation error handler (422s)
 from fastapi.exceptions import RequestValidationError
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=422,
-        content={"detail": "Validation error", "errors": exc.errors()}
+        content={"detail": exc.errors()}
     )
 
 app.add_middleware(
