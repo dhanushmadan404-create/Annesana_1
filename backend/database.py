@@ -1,29 +1,30 @@
 # backend/database.py
-import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import os
 
 # ---------------- DATABASE URL ----------------
-# Render sets the DATABASE_URL environment variable
-DATABASE_URL = os.getenv("DATABASE_URL")  # ensure this exists in Render env
+# Fetch from Render environment variables
+DATABASE_URL = os.getenv("DATABASE_URL")  # Render sets this in the dashboard
 
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL environment variable not set!")
+    raise ValueError("DATABASE_URL environment variable not set")
 
-# ---------------- ENGINE & SESSION ----------------
+# ---------------- ENGINE ----------------
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,
+    echo=True,            # Set to True for debug SQL queries
+    pool_pre_ping=True
 )
 
+# ---------------- SESSION ----------------
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# ---------------- BASE ----------------
 Base = declarative_base()
 
-# ---------------- DEPENDENCY ----------------
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# ---------------- CREATE TABLES ----------------
+def init_db():
+    import fastapi_models  # import all models
+    Base.metadata.create_all(bind=engine)
