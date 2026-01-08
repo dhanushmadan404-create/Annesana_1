@@ -45,7 +45,7 @@ def get_all_food_locations(db: Session = Depends(get_db)):
     return db.query(fastapi_models.Food).all()
 
 # ---------------- CREATE FOOD ----------------
-@router.post("/", response_model=fastapi_schemas.FoodResponse)
+@router.post("", response_model=fastapi_schemas.FoodResponse)
 def create_food(
     food_name: str = Form(...),
     category: str = Form(...),

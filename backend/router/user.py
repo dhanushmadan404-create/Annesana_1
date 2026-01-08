@@ -13,7 +13,7 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
-@router.post("/", response_model=UserResponse)
+@router.post("", response_model=UserResponse)
 def create_user(
     name: str = Form(...),
     email: str = Form(...),

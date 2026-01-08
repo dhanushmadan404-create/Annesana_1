@@ -13,7 +13,7 @@ from fastapi_models import User
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 # ---------------- CREATE VENDOR ----------------
-@router.post("/", response_model=fastapi_schemas.VendorResponse)
+@router.post("", response_model=fastapi_schemas.VendorResponse)
 def create_vendor(
     phone_number: str = Form(...),
     opening_time: str = Form(...),

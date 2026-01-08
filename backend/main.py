@@ -26,7 +26,8 @@ app.include_router(user.router, prefix="/api")
 app.include_router(food.router, prefix="/api")
 app.include_router(vendor.router, prefix="/api")
 
-# Add roots without /api just in case Vercel rewrites differently
+# Also include without prefix just as fallback for local testing if needed
+# but Vercel will mostly use the /api prefix versions via the rewrite
 app.include_router(user.router)
 app.include_router(food.router)
 app.include_router(vendor.router)
