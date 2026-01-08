@@ -9,14 +9,16 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/uploads/(.*)",
-      "dest": "backend/uploads/$1"
+      "source": "/api/(.*)",
+      "destination": "backend/main.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "backend/main.py"
+      "source": "/uploads/(.*)",
+      "destination": "backend/main.py"
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }

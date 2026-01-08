@@ -21,7 +21,7 @@ document.getElementById("append").addEventListener("click", async (e) => {
 
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("registrationEmail").value.trim();
-  consword = document.getElementById("registrationPassword").value.trim();
+  const password = document.getElementById("registrationPassword").value.trim();
   const role = document.getElementById("role").value;
   const imageFile = document.getElementById("image").files[0];
 
