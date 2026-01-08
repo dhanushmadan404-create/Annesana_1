@@ -1,10 +1,19 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index"
+      "src": "backend/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/uploads/(.*)",
+      "dest": "backend/uploads/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "backend/main.py"
     }
   ]
 }

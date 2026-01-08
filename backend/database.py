@@ -1,37 +1,59 @@
+# ==================== database.py ====================
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 import os
+from fastapi import HTTPException
 
+# -------------------------------------------------
+# Load environment variables
+# -------------------------------------------------
 load_dotenv()
 
-db_url = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Handle Vercel's potentially outdated postgres:// prefix
-if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
 
-if db_url:
-    engine = create_engine(db_url)
-    SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-else:
-    engine = None
-    SessionLocal = None
+# Fix postgres:// → postgresql:// for SQLAlchemy
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+
+# -------------------------------------------------
+# SQLAlchemy engine (Vercel safe)
+# -------------------------------------------------
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,   # VERY important for Vercel
+    pool_size=5,
+    max_overflow=10
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
 Base = declarative_base()
 
+# -------------------------------------------------
+# Dependency
+# -------------------------------------------------
 def get_db():
-    if not db_url:
-        raise ValueError("❌ DATABASE_URL is not set in environment variables.")
-    
-    if not SessionLocal:
-        raise ValueError("❌ Database SessionLocal not initialized.")
-    
     db = SessionLocal()
     try:
         yield db
     except Exception as e:
-        print(f"Database error: {e}")
-        raise e
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Database error"
+        )
     finally:
         db.close()

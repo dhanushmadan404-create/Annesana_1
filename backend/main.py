@@ -1,25 +1,28 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 import os
 import sys
 import logging
 
-# Configure logging
+# ---------------- LOGGING ----------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Standard setup for imports
+# ---------------- PATH FIX ----------------
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-# Import routers safely
-from router import user, food, vendor
+# ---------------- ROUTERS ----------------
+from .router import user, food, vendor, auth   # 👈 ADD auth
 
+# ---------------- APP ----------------
 app = FastAPI(title="Annesana API")
 
-# 1. Specific handler for FastAPI HTTPExceptions 
+# ---------------- EXCEPTION HANDLERS ----------------
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
@@ -27,22 +30,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={"detail": exc.detail}
     )
 
-# 2. General handler for unexpected crashes (500s)
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
-    error_msg = str(exc)
-    logger.error(f"CRITICAL ERROR: {error_msg}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={
-            "detail": "Internal Server Error",
-            "error_type": type(exc).__name__,
-            "message": error_msg 
-        }
-    )
-
-# 3. Validation error handler (422s)
-from fastapi.exceptions import RequestValidationError
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
@@ -50,25 +37,38 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"detail": exc.errors()}
     )
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"CRITICAL ERROR: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal Server Error",
+            "error_type": type(exc).__name__
+        }
+    )
+
+# ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],   # later restrict
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Inclusion under /api prefix matches frontend exactly
+# ---------------- STATIC FILES (IMAGES) ----------------
+# 🔥 THIS FIXES IMAGE NOT SHOWING
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# ---------------- ROUTERS (API PREFIX ONLY) ----------------
+# ✅ Vercel safe
+app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(food.router, prefix="/api")
 app.include_router(vendor.router, prefix="/api")
 
-# Also include without prefix just as fallback for local testing if needed
-# but Vercel will mostly use the /api prefix versions via the rewrite
-app.include_router(user.router)
-app.include_router(food.router)
-app.include_router(vendor.router)
-
+# ---------------- HEALTH ----------------
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "message": "Backend is running!"}
@@ -76,12 +76,3 @@ def health_check():
 @app.get("/")
 def home():
     return {"message": "Welcome to Annesana API."}
-
-@app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def catch_all(request: Request, path_name: str):
-    return {
-        "error": "Route not found",
-        "path_received": path_name,
-        "method": request.method,
-        "full_url": str(request.url)
-    }

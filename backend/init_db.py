@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 # Add current directory to path
 sys.path.append(os.path.dirname(__file__))
 
-from database import engine, Base
-import fastapi_models 
+from .database import engine, Base
+from . import fastapi_models 
 
 # Load environment variables
 load_dotenv()

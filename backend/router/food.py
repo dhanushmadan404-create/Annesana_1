@@ -1,30 +1,37 @@
 # ==================== routers/food.py ====================
-from fastapi import APIRouter, Depends, HTTPException, Form, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List
-import fastapi_schemas
-import fastapi_models
-from database import get_db
+from .. import fastapi_schemas
+from .. import fastapi_models
+from ..database import get_db
 
 import os
 import tempfile
 import string
+import base64
+import uuid
+
+# ---------------- JWT ----------------
+from ..core.security import get_current_user
+from ..fastapi_models import User
 
 # ---------------- UTILS ----------------
 BASE62_ALPHABET = string.digits + string.ascii_letters
 
 def base62_decode(s: str) -> int:
-    if not s: return 0
-    # Handle plain integers if they are passed instead of strings
-    if s.isdigit(): return int(s)
+    if not s:
+        return 0
+    if s.isdigit():
+        return int(s)
+
     res = 0
     for char in s:
-        try:
+        if char in BASE62_ALPHABET:
             res = res * 62 + BASE62_ALPHABET.index(char)
-        except ValueError:
-            continue # ignore invalid chars
     return res
 
+# ---------------- IMAGE STORAGE ----------------
 try:
     UPLOAD_DIR = "uploads"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -32,14 +39,25 @@ except OSError:
     UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ---------------- ROUTER ----------------
-from core.security import get_current_user
-from fastapi_models import User
+def save_base64_image(base64_string: str) -> str:
+    try:
+        header, encoded = base64_string.split(",", 1)
+    except ValueError:
+        encoded = base64_string
+
+    image_bytes = base64.b64decode(encoded)
+    filename = f"{uuid.uuid4().hex}.png"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as f:
+        f.write(image_bytes)
+
+    return f"/uploads/{filename}"
 
 # ---------------- ROUTER ----------------
 router = APIRouter(prefix="/foods", tags=["Foods"])
 
-# ---------------- GET LOCATIONS ----------------
+# ---------------- GET ALL FOOD LOCATIONS ----------------
 @router.get("/locations", response_model=List[fastapi_schemas.FoodResponse])
 def get_all_food_locations(db: Session = Depends(get_db)):
     return db.query(fastapi_models.Food).all()
@@ -51,7 +69,7 @@ def create_food(
     category: str = Form(...),
     latitude: float = Form(...),
     longitude: float = Form(...),
-    vendor_id: str = Form(...),  # Accept Base62 string
+    vendor_id: str = Form(...),
     image_base64: str = Form(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -61,9 +79,11 @@ def create_food(
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid Base62 vendor_id")
 
+    image_url = save_base64_image(image_base64)
+
     new_food = fastapi_models.Food(
         food_name=food_name,
-        food_image_url=image_base64, # Save the Base64 string directly
+        food_image_url=image_url,
         category=category,
         latitude=latitude,
         longitude=longitude,
@@ -78,7 +98,11 @@ def create_food(
 # ---------------- GET FOODS BY CATEGORY ----------------
 @router.get("/category/{category_name}", response_model=List[fastapi_schemas.FoodResponse])
 def get_foods_by_category(category_name: str, db: Session = Depends(get_db)):
-    foods = db.query(fastapi_models.Food).filter(fastapi_models.Food.category == category_name).all()
+    foods = (
+        db.query(fastapi_models.Food)
+        .filter(fastapi_models.Food.category == category_name)
+        .all()
+    )
     if not foods:
         raise HTTPException(status_code=404, detail="No foods found in this category")
     return foods
@@ -91,15 +115,23 @@ def get_foods_by_vendor(vendor_id: str, db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid Base62 vendor_id")
 
-    foods = db.query(fastapi_models.Food).filter(fastapi_models.Food.vendor_id == vendor_id_int).all()
+    foods = (
+        db.query(fastapi_models.Food)
+        .filter(fastapi_models.Food.vendor_id == vendor_id_int)
+        .all()
+    )
     if not foods:
         raise HTTPException(status_code=404, detail="No foods found for this vendor")
     return foods
-# -----------------get food by food id -----------------
 
+# ---------------- GET FOOD LOCATION ----------------
 @router.get("/location/{food_id}")
 def get_food_location(food_id: int, db: Session = Depends(get_db)):
-    food = db.query(fastapi_models.Food).filter(fastapi_models.Food.food_id == food_id).first()
+    food = (
+        db.query(fastapi_models.Food)
+        .filter(fastapi_models.Food.food_id == food_id)
+        .first()
+    )
 
     if not food:
         raise HTTPException(status_code=404, detail="Food not found")
@@ -110,11 +142,12 @@ def get_food_location(food_id: int, db: Session = Depends(get_db)):
         "latitude": food.latitude,
         "longitude": food.longitude
     }
-# ---------------- DELETE FOOD BY VENDOR + FOOD NAME ----------------
+
+# ---------------- DELETE FOOD BY VENDOR + NAME ----------------
 @router.delete("/vendor/{vendor_id}/food/{food_name}")
 def delete_food_by_vendor_and_name(
-    vendor_id: str, 
-    food_name: str, 
+    vendor_id: str,
+    food_name: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -137,13 +170,12 @@ def delete_food_by_vendor_and_name(
 
     db.delete(food)
     db.commit()
+    return {"message": "Food deleted successfully"}
 
-    return {"message": "Food deleted successfully", "vendor_id": vendor_id, "food_name": food_name}
-
-# ---------------- DELETE ALL FOODS BY VENDOR ID ----------------
+# ---------------- DELETE ALL FOODS BY VENDOR ----------------
 @router.delete("/vendor/{vendor_id}")
 def delete_foods_by_vendor(
-    vendor_id: str, 
+    vendor_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -152,7 +184,11 @@ def delete_foods_by_vendor(
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid Base62 vendor_id")
 
-    foods = db.query(fastapi_models.Food).filter(fastapi_models.Food.vendor_id == vendor_id_int).all()
+    foods = (
+        db.query(fastapi_models.Food)
+        .filter(fastapi_models.Food.vendor_id == vendor_id_int)
+        .all()
+    )
 
     if not foods:
         raise HTTPException(status_code=404, detail="No foods found for this vendor")
@@ -161,12 +197,12 @@ def delete_foods_by_vendor(
         db.delete(food)
 
     db.commit()
-    return {"message": "All foods deleted for this vendor", "vendor_id": vendor_id, "deleted_count": len(foods)}
+    return {"message": "All foods deleted", "count": len(foods)}
 
 # ---------------- DELETE FOOD BY FOOD ID ----------------
 @router.delete("/{food_id}")
 def delete_food_by_id(
-    food_id: str, 
+    food_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -175,10 +211,15 @@ def delete_food_by_id(
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid Base62 food_id")
 
-    food = db.query(fastapi_models.Food).filter(fastapi_models.Food.food_id == food_id_int).first()
+    food = (
+        db.query(fastapi_models.Food)
+        .filter(fastapi_models.Food.food_id == food_id_int)
+        .first()
+    )
+
     if not food:
         raise HTTPException(status_code=404, detail="Food not found")
 
     db.delete(food)
     db.commit()
-    return {"message": "Food deleted successfully", "food_id": food_id}
+    return {"message": "Food deleted successfully"}
