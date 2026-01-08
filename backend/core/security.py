@@ -1,14 +1,16 @@
 # ==================== core/security.py ====================
 
-from passlib.context import CryptContext
-import jwt
 from datetime import datetime, timedelta
 import os
-from dotenv import load_dotenv
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
+
+import jwt  # ✅ PyJWT
+from jwt import PyJWTError
 
 import database
 import fastapi_models
@@ -18,113 +20,83 @@ import fastapi_models
 # -------------------------------------------------
 load_dotenv()
 
-# -------------------------------------------------
-# Password hashing (Argon2 – secure)
-# -------------------------------------------------
-pwd_context = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto"
-)
-
-# -------------------------------------------------
-# JWT configuration
-# -------------------------------------------------
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "annesana_fallback_secret_key_change_this"
-)
+SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
-
-# IMPORTANT:
-# tokenUrl must match your login route EXACTLY
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/users/login"
-)
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 # -------------------------------------------------
-# Password helpers
+# Password hashing
 # -------------------------------------------------
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# -------------------------------------------------
+# OAuth2
+# -------------------------------------------------
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# -------------------------------------------------
+# Password utils
+# -------------------------------------------------
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
 # -------------------------------------------------
-# Create JWT token
+# Token utils
 # -------------------------------------------------
-def create_access_token(data: dict) -> str:
-    """
-    data must contain:
-    {
-        "sub": email,
-        "user_id": int,
-        "role": str
-    }
-    """
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+
+    expire = datetime.utcnow() + (
+        expires_delta
+        if expires_delta
+        else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
         to_encode,
         SECRET_KEY,
-        algorithm=ALGORITHM
+        algorithm=ALGORITHM,
     )
     return encoded_jwt
 
 # -------------------------------------------------
-# Decode JWT token
+# Auth helpers
 # -------------------------------------------------
-def decode_access_token(token: str) -> dict:
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
     try:
         payload = jwt.decode(
             token,
             SECRET_KEY,
-            algorithms=[ALGORITHM]
+            algorithms=[ALGORITHM],
         )
-        return payload
-
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-# -------------------------------------------------
-# Get current logged-in user
-# -------------------------------------------------
-def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(database.get_db)
-):
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authorization token missing",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    payload = decode_access_token(token)
-
-    email = payload.get("sub")
-    if not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        email: str | None = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except PyJWTError:
+        raise credentials_exception
 
     user = (
         db.query(fastapi_models.User)
@@ -133,10 +105,6 @@ def get_current_user(
     )
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise credentials_exception
 
     return user
