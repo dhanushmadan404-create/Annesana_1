@@ -14,7 +14,7 @@ load_dotenv()
 # Use Argon2 for password hashing
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "annesana_super_secret_key_123")
+SECRET_KEY = os.getenv("SECRET_KEY", "annesana_fallback_secret_key_999")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
