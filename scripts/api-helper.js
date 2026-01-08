@@ -39,7 +39,21 @@ async function fetchAPI(endpoint, options = {}) {
 
         if (!response.ok) {
             // Extract error message from JSON if possible
-            const errorMsg = data.detail || data.error || data.message || `Request failed with status ${response.status}`;
+            let errorMsg = 'An unknown error occurred';
+
+            if (data.detail) {
+                if (typeof data.detail === 'string') {
+                    errorMsg = data.detail;
+                } else if (Array.isArray(data.detail)) {
+                    // FastAPI validation errors are an array of objects
+                    errorMsg = data.detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join('; ');
+                } else if (typeof data.detail === 'object') {
+                    errorMsg = JSON.stringify(data.detail);
+                }
+            } else {
+                errorMsg = data.error || data.message || `Request failed with status ${response.status}`;
+            }
+
             throw new Error(errorMsg);
         }
 

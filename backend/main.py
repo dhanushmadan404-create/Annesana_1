@@ -22,13 +22,14 @@ app = FastAPI(title="Annesana API")
 # Global Exception Handler for 500s
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Global error caught: {str(exc)}", exc_info=True)
+    error_msg = str(exc)
+    logger.error(f"Global error caught: {error_msg}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={
             "detail": "Internal Server Error",
             "error_type": type(exc).__name__,
-            "message": str(exc) if os.getenv("DEBUG") == "true" else "An unexpected error occurred. Please check server logs."
+            "message": error_msg 
         }
     )
 
