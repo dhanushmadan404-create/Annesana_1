@@ -81,15 +81,11 @@ document.getElementById("append").addEventListener("click", async (e) => {
     formData.append("role", role);
     formData.append("image_base64", image_base64);
 
-    const res = await fetch(`${API_URL}/users`, {
+    // Use the robust fetchAPI helper
+    const data = await fetchAPI('/users', {
       method: "POST",
       body: formData
     });
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.detail || "Registration failed");
-    }
 
     alert("Registration successful ✅ Welcome! Please login now.");
     visible('loginForm', 'registerForm');
@@ -115,14 +111,11 @@ document.getElementById("check").addEventListener("click", async (e) => {
   if (!password) { passwordError.textContent = "Password is required"; return; }
 
   try {
-    const res = await fetch(`${API_URL}/users/login`, {
+    const data = await fetchAPI('/users/login', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Login failed");
 
     // ✅ Secure Full Stack Session Management
     localStorage.setItem("token", data.access_token);
@@ -134,8 +127,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
     if (data.role === "user") location.href = "../index.html";
     else if (data.role === "admin") location.href = "./admin.html";
     else if (data.role === "vendor") {
-      const checkRes = await fetch(`${API_URL}/vendors/check/${data.user_id}/`);
-      const checkData = await checkRes.json();
+      const checkData = await fetchAPI(`/vendors/check/${data.user_id}/`);
       location.href = checkData.exists ? "./vendor-profile.html" : "./registration.html";
     }
   } catch (err) {

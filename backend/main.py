@@ -1,7 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import os
 import sys
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Standard setup for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,6 +18,28 @@ if current_dir not in sys.path:
 from router import user, food, vendor
 
 app = FastAPI(title="Annesana API")
+
+# Global Exception Handler for 500s
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global error caught: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal Server Error",
+            "error_type": type(exc).__name__,
+            "message": str(exc) if os.getenv("DEBUG") == "true" else "An unexpected error occurred. Please check server logs."
+        }
+    )
+
+# Override default validation error handler to be more specific if needed
+from fastapi.exceptions import RequestValidationError
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Validation error", "errors": exc.errors()}
+    )
 
 app.add_middleware(
     CORSMiddleware,
