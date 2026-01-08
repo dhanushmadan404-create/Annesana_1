@@ -8,20 +8,17 @@ import base64
 import uuid
 import tempfile
 
-from ..database import get_db
-from ..core.security import get_current_user
-from ..fastapi_models import User, Vendor
-from .. import fastapi_schemas
+from database import get_db
+from core.security import get_current_user
+from fastapi_models import User, Vendor
+import fastapi_schemas
 
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 # ---------------- IMAGE STORAGE (same as user) ----------------
-try:
-    UPLOAD_DIR = "uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-except OSError:
-    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Vercel has a read-only filesystem except for /tmp
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def save_base64_image(base64_string: str) -> str:
     try:

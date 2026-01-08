@@ -10,8 +10,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from .. import database
-from .. import fastapi_models
+import database
+import fastapi_models
 
 # -------------------------------------------------
 # Load environment variables

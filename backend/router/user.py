@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from ..database import get_db
+from database import get_db
 
-from ..core.security import (
+from core.security import (
     hash_password,
     verify_password,
     create_access_token,
     get_current_user
 )
 
-from ..fastapi_models import User
-from ..fastapi_schemas import UserResponse, LoginResponse
+from fastapi_models import User
+from fastapi_schemas import UserResponse, LoginResponse
 
 from pydantic import BaseModel
 import os
@@ -26,12 +26,9 @@ router = APIRouter(
 )
 
 # ---------------- IMAGE STORAGE ----------------
-try:
-    UPLOAD_DIR = "uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-except OSError:
-    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Vercel has a read-only filesystem except for /tmp
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def save_base64_image(base64_string: str) -> str:
     try:

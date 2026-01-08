@@ -11,7 +11,7 @@ from sqlalchemy import (
     Time
 )
 from sqlalchemy.orm import relationship
-from .database import Base
+from database import Base
 from datetime import datetime
 import enum
 

@@ -2,9 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from typing import List
-from .. import fastapi_schemas
-from .. import fastapi_models
-from ..database import get_db
+import fastapi_schemas
+import fastapi_models
+from database import get_db
 
 import os
 import tempfile
@@ -13,8 +13,8 @@ import base64
 import uuid
 
 # ---------------- JWT ----------------
-from ..core.security import get_current_user
-from ..fastapi_models import User
+from core.security import get_current_user
+from fastapi_models import User
 
 # ---------------- UTILS ----------------
 BASE62_ALPHABET = string.digits + string.ascii_letters
@@ -32,12 +32,9 @@ def base62_decode(s: str) -> int:
     return res
 
 # ---------------- IMAGE STORAGE ----------------
-try:
-    UPLOAD_DIR = "uploads"
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-except OSError:
-    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Vercel has a read-only filesystem except for /tmp
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def save_base64_image(base64_string: str) -> str:
     try:
