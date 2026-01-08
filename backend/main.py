@@ -62,7 +62,7 @@ app.mount(
 )
 
 # ---------------- ROUTERS ----------------
-from routers import auth, user, vendor, food
+from router import auth, user, vendor, food
 
 API_PREFIX = "/api"
 
