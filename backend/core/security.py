@@ -1,5 +1,3 @@
-# ==================== core/security.py ====================
-
 from datetime import datetime, timedelta
 import os
 
@@ -8,68 +6,41 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
-
-import jwt  # ✅ PyJWT
+import jwt
 from jwt import PyJWTError
 
-import database
-import fastapi_models
+from database import SessionLocal
+from models.user import User
 
-# -------------------------------------------------
-# Load environment variables
-# -------------------------------------------------
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# -------------------------------------------------
-# Password hashing
-# -------------------------------------------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# -------------------------------------------------
-# OAuth2
-# -------------------------------------------------
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# -------------------------------------------------
-# Password utils
-# -------------------------------------------------
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
 
-
-def get_password_hash(password: str) -> str:
+def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-# -------------------------------------------------
-# Token utils
-# -------------------------------------------------
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
-
     expire = datetime.utcnow() + (
-        expires_delta
-        if expires_delta
-        else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-
     to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    encoded_jwt = jwt.encode(
-        to_encode,
-        SECRET_KEY,
-        algorithm=ALGORITHM,
-    )
-    return encoded_jwt
 
-# -------------------------------------------------
-# Auth helpers
-# -------------------------------------------------
 def get_db():
-    db = database.SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:
@@ -78,32 +49,23 @@ def get_db():
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Invalid authentication",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
     try:
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-        )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str | None = payload.get("sub")
         if email is None:
             raise credentials_exception
     except PyJWTError:
         raise credentials_exception
 
-    user = (
-        db.query(fastapi_models.User)
-        .filter(fastapi_models.User.email == email)
-        .first()
-    )
-
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         raise credentials_exception
 

@@ -1,6 +1,6 @@
 # backend/main.py
+
 import os
-import sys
 import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,18 +12,11 @@ from fastapi.exceptions import RequestValidationError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ---------------- PATH FIX ----------------
-# Ensure backend folder is in sys.path for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
-
-# ---------------- ROUTERS ----------------
-# Use absolute imports to avoid Vercel relative import issues
-from router import user, food, vendor, auth
-
 # ---------------- APP ----------------
-app = FastAPI(title="Annesana API")
+app = FastAPI(
+    title="Annesana API",
+    version="1.0.0"
+)
 
 # ---------------- EXCEPTION HANDLERS ----------------
 @app.exception_handler(HTTPException)
@@ -42,43 +35,51 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"CRITICAL ERROR: {exc}", exc_info=True)
+    logger.error(f"Unhandled error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={
-            "detail": "Internal Server Error",
-            "error_type": type(exc).__name__
-        }
+        content={"detail": "Internal Server Error"}
     )
 
 # ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later restrict to your frontend domain
+    allow_origins=["*"],  # restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ---------------- STATIC FILES (IMAGES) ----------------
-# Use absolute path to avoid Vercel errors
-upload_dir = os.path.join(current_dir, "uploads")
-os.makedirs(upload_dir, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
+# ---------------- STATIC FILES ----------------
+# Render allows write access only to /tmp
+UPLOAD_DIR = "/tmp/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ---------------- ROUTERS (API PREFIX ONLY) ----------------
-# ✅ Vercel-safe
-app.include_router(auth.router, prefix="/api")
-app.include_router(user.router, prefix="/api")
-app.include_router(food.router, prefix="/api")
-app.include_router(vendor.router, prefix="/api")
+app.mount(
+    "/uploads",
+    StaticFiles(directory=UPLOAD_DIR),
+    name="uploads"
+)
+
+# ---------------- ROUTERS ----------------
+from router import auth, user, vendor, food
+
+API_PREFIX = "/api"
+
+app.include_router(auth.router)
+app.include_router(user.router)
+app.include_router(vendor.router)
+app.include_router(food.router)
 
 # ---------------- HEALTH ----------------
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "message": "Backend is running!"}
+    return {
+        "status": "ok",
+        "service": "Annesana Backend"
+    }
 
 # ---------------- ROOT ----------------
 @app.get("/")
-def home():
-    return {"message": "Welcome to Annesana API."}
+def root():
+    return {"message": "Welcome to Annesana API"}
