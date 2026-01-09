@@ -1,19 +1,27 @@
+// ---------------- API URL ----------------
 const API_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://127.0.0.1:8000/api'
-    : 'https://annesana-1.onrender.com/api';
+  window.location.hostname === "localhost"
+    ? "http://127.0.0.1:8000/api"
+    : "https://annesana-1.onrender.com/api";
+
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
-  document.getElementById(showForm).classList.add("visible");
-  document.getElementById(hideForm).classList.remove("visible");
+  const show = document.getElementById(showForm);
+  const hide = document.getElementById(hideForm);
+
+  if (!show || !hide) return;
+
+  show.classList.add("visible");
+  hide.classList.remove("visible");
 }
 
+// ---------------- IMAGE TO BASE64 ----------------
 function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
+    reader.onerror = (error) => reject(error);
   });
 }
 
@@ -33,37 +41,30 @@ document.getElementById("append").addEventListener("click", async (e) => {
   const roleError = document.getElementById("roleError");
   const imageError = document.getElementById("imageError");
 
-  [nameError, emailError, passwordError, roleError, imageError].forEach(el => el && (el.textContent = ""));
+  [nameError, emailError, passwordError, roleError, imageError].forEach(
+    (el) => (el.textContent = "")
+  );
 
   let isValid = true;
 
-  // Advanced Name Validation
-  if (name.length < 3) {
-    nameError.textContent = "Name must be at least 3 characters";
-    isValid = false;
-  } else if (!/^[A-Za-z\s]+$/.test(name)) {
-    nameError.textContent = "Name should contain only letters";
+  if (name.length < 3 || !/^[A-Za-z\s]+$/.test(name)) {
+    nameError.textContent = "Name must be at least 3 letters";
     isValid = false;
   }
 
-  // Strict Email Validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    emailError.textContent = "Please enter a valid email address";
-    isValid = false;
-  } else if (!email.endsWith("@gmail.com")) {
-    emailError.textContent = "Only @gmail.com accounts are allowed";
+  if (!emailRegex.test(email) || !email.endsWith("@gmail.com")) {
+    emailError.textContent = "Only valid @gmail.com emails allowed";
     isValid = false;
   }
 
-  // Strong Password Validation
   if (password.length < 6) {
     passwordError.textContent = "Password must be at least 6 characters";
     isValid = false;
   }
 
   if (!role) {
-    roleError.textContent = "Please select a user role";
+    roleError.textContent = "Please select a role";
     isValid = false;
   }
 
@@ -76,6 +77,7 @@ document.getElementById("append").addEventListener("click", async (e) => {
 
   try {
     const image_base64 = await getBase64(imageFile);
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
@@ -83,23 +85,24 @@ document.getElementById("append").addEventListener("click", async (e) => {
     formData.append("role", role);
     formData.append("image_base64", image_base64);
 
-    // Use the robust fetchAPI helper
-    const data = await fetchAPI(`${API_URL}/users`, {
+    await fetchAPI(`${API_URL}/users`, {
       method: "POST",
-      body: formData
+      body: formData,
     });
 
-    alert("Registration successful ✅ Welcome! Please login now.");
-    visible('loginForm', 'registerForm');
+    alert("Registration successful ✅ Please login");
+
+    // ✅ FIXED TOGGLE
+    visible("loginForm", "registerForm");
   } catch (err) {
-    console.error("Registration error:", err);
-    alert(`Error: ${err.message}`);
+    alert(err.message);
   }
 });
 
 // ---------------- LOGIN ----------------
 document.getElementById("check").addEventListener("click", async (e) => {
   e.preventDefault();
+
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -109,31 +112,39 @@ document.getElementById("check").addEventListener("click", async (e) => {
   emailError.textContent = "";
   passwordError.textContent = "";
 
-  if (!email) { emailError.textContent = "Email is required"; return; }
-  if (!password) { passwordError.textContent = "Password is required"; return; }
+  if (!email) {
+    emailError.textContent = "Email required";
+    return;
+  }
+
+  if (!password) {
+    passwordError.textContent = "Password required";
+    return;
+  }
 
   try {
     const data = await fetchAPI(`${API_URL}/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
-    // ✅ Secure Full Stack Session Management
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("user", data.user_id);
     localStorage.setItem("role", data.role);
     localStorage.setItem("user_details", JSON.stringify(data));
 
-    // Role-based redirection
     if (data.role === "user") location.href = "../../index.html";
     else if (data.role === "admin") location.href = "./admin.html";
     else if (data.role === "vendor") {
-      const checkData = await fetchAPI(`${API_URL}/vendors/check/${data.user_id}/`);
-      location.href = checkData.exists ? "./vendor-profile.html" : "./registration.html";
+      const checkData = await fetchAPI(
+        `${API_URL}/vendors/check/${data.user_id}/`
+      );
+      location.href = checkData.exists
+        ? "./vendor-profile.html"
+        : "./registration.html";
     }
   } catch (err) {
-    console.error("Login error:", err);
-    alert(`Error: ${err.message}`);
+    alert(err.message);
   }
 });

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,67 +11,74 @@
 <body>
   <header>
     <div class="header_container">
-      <img class="logo" src="../assets/annesana.png" alt="Annesana" onclick="window.location.href='/index.html'" />
+      <img class="logo" src="../assets/annesana.png" alt="Annesana"
+        onclick="window.location.href='/index.html'" />
     </div>
   </header>
-  <main>
-    <!-- login -->
-    <form id="loginForm" class="form visible">
-      <h1>login</h1>
-      <label for="email">Email</label><br />
-      <input id="email" name="email" type="text" minlength="13" required /><br />
-      <label for="email" id="loginEmail"></label><br />
 
-      <label for="passwor">Password</label><br /><input id="password" name="password" type="password" required /><br />
-      <label for="password" id="loginPassword"></label><br />
-      <a href="#" id="check">Login</a>
+  <main>
+    <!-- LOGIN -->
+    <form id="loginForm" class="form visible">
+      <h1>Login</h1>
+
+      <label>Email</label>
+      <input id="email" type="text" required />
+      <label id="loginEmail"></label>
+
+      <label>Password</label>
+      <input id="password" type="password" required />
+      <label id="loginPassword"></label>
+
+      <button type="button" id="check">Login</button>
+
       <h4>
-        you Don't have account please
-        <a href="#" onclick="visible('registerForm','loginForm')">Register </a>your account
+        You don't have an account?
+        <a href="#" onclick="event.preventDefault(); visible('registerForm','loginForm')">
+          Register
+        </a>
       </h4>
     </form>
 
-    <!-- registration -->
+    <!-- REGISTER -->
     <form id="registerForm" class="form">
-      <h1>register</h1>
-      <!-- name -->
-      <label for="name">Name</label><br />
-      <input id="name" name="name" type="text" minlength="3" required /><br />
-      <label for="name" id="nameError"></label><br />
-      <!-- Email --><br />
-      <label for="registrationEmail">Email</label><br />
-      <input id="registrationEmail" name="email" type="text" minlength="13" required /><br />
-      <label for="registrationEmail" id="emailError"></label><br />
-      <!-- password --><br />
-      <label for="registrationPassword">Password</label><br /><input id="registrationPassword" name="password"
-        type="password" minlength="6" required /><br />
-      <label for="registrationPassword" id="passwordError"></label><br />
+      <h1>Register</h1>
 
-      <!-- role -->
-      <label for="role">Role</label>
-      <select name="role" id="role" required>
-        <option value="">Select your role</option>
+      <label>Name</label>
+      <input id="name" type="text" required />
+      <label id="nameError"></label>
+
+      <label>Email</label>
+      <input id="registrationEmail" type="text" required />
+      <label id="emailError"></label>
+
+      <label>Password</label>
+      <input id="registrationPassword" type="password" required />
+      <label id="passwordError"></label>
+
+      <label>Role</label>
+      <select id="role">
+        <option value="">Select role</option>
         <option value="user">User</option>
         <option value="vendor">Vendor</option>
-        <option value="admin" disabled>Admin</option>
       </select>
-      <label for="role" id="roleError"></label>
-      <br />
+      <label id="roleError"></label>
 
-      <div class="form-group">
-        <label>Profile Image</label><br />
-        <input id="image" type="file" class="image-upload" accept="image/*" required /><br />
-        <label for="role" id="imageError"></label><br />
-      </div>
-      <a href="#" id="append">Register</a>
+      <label>Profile Image</label>
+      <input id="image" type="file" accept="image/*" />
+      <label id="imageError"></label>
+
+      <button type="button" id="append">Register</button>
+
       <h4>
-        you are already have an account please
-        <a href="#" onclick="visible('loginForm','registerForm')">login</a> your account
+        Already have an account?
+        <a href="#" onclick="event.preventDefault(); visible('loginForm','registerForm')">
+          Login
+        </a>
       </h4>
     </form>
   </main>
+
   <script src="../scripts/api-helper.js"></script>
   <script src="../scripts/login.js"></script>
 </body>
-
 </html>
