@@ -1,5 +1,7 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
-
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/api'
+    : 'https://annesana-1.onrender.com/api';
 // ---------------- MENU LIST ----------------
 const ul = document.getElementById("list_container");
 const input = document.getElementById("menuName");
@@ -65,7 +67,7 @@ document.getElementById("save")?.addEventListener("click", () => {
 const map = L.map("map").setView([13.0827, 80.2707], 11);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20 }).addTo(map);
 
-const foodIcon = L.icon({ iconUrl: "/assets/3448609.png", iconSize: [40, 40], iconAnchor: [20, 40] });
+const foodIcon = L.icon({ iconUrl: "../assets/3448609.png", iconSize: [40, 40], iconAnchor: [20, 40] });
 let marker = null;
 let latitude = null;
 let longitude = null;

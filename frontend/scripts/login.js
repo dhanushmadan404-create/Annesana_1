@@ -1,5 +1,7 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
-
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/api'
+    : 'https://annesana-1.onrender.com/api';
 // ---------------- SHOW / HIDE FORMS ----------------
 function visible(showForm, hideForm) {
   document.getElementById(showForm).classList.add("visible");
@@ -82,7 +84,7 @@ document.getElementById("append").addEventListener("click", async (e) => {
     formData.append("image_base64", image_base64);
 
     // Use the robust fetchAPI helper
-    const data = await fetchAPI('/users', {
+    const data = await fetchAPI(`${API_URL}/users`, {
       method: "POST",
       body: formData
     });
@@ -111,7 +113,7 @@ document.getElementById("check").addEventListener("click", async (e) => {
   if (!password) { passwordError.textContent = "Password is required"; return; }
 
   try {
-    const data = await fetchAPI('/users/login', {
+    const data = await fetchAPI(`${API_URL}/users/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
@@ -124,10 +126,10 @@ document.getElementById("check").addEventListener("click", async (e) => {
     localStorage.setItem("user_details", JSON.stringify(data));
 
     // Role-based redirection
-    if (data.role === "user") location.href = "../index.html";
+    if (data.role === "user") location.href = "../../index.html";
     else if (data.role === "admin") location.href = "./admin.html";
     else if (data.role === "vendor") {
-      const checkData = await fetchAPI(`/vendors/check/${data.user_id}/`);
+      const checkData = await fetchAPI(`${API_URL}/vendors/check/${data.user_id}/`);
       location.href = checkData.exists ? "./vendor-profile.html" : "./registration.html";
     }
   } catch (err) {

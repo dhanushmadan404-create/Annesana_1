@@ -1,4 +1,7 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/api'
+    : 'https://annesana-1.onrender.com/api';
 let list = [];
 let menu = document.querySelector(".menu-list");
 let inputList = document.getElementById("list");
@@ -39,7 +42,7 @@ document.getElementById("location").addEventListener("click", () => {
 });
 
 const foodIcon = L.icon({
-    iconUrl: "/assets/3448609.png",
+    iconUrl: "../assets/3448609.png",
     iconSize: [40, 40],
     iconAnchor: [20, 40],
 });

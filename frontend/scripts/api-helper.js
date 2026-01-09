@@ -2,12 +2,13 @@
  * SUPER ROBUST API helper for Annesana
  * Prevents [object Object] errors and handles non-JSON / 500 errors gracefully.
  */
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+const API_URL =
+  window.location.hostname === 'localhost'
     ? 'http://127.0.0.1:8000/api'
-    : '/api';
+    : 'https://annesana-1.onrender.com/api';
 
 async function fetchAPI(endpoint, options = {}) {
-    const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
 
     const headers = {
         'Accept': 'application/json',

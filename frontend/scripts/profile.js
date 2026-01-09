@@ -1,5 +1,7 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000/api' : '/api';
-
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/api'
+    : 'https://annesana-1.onrender.com/api';
 const token = localStorage.getItem("token");
 
 document.addEventListener("DOMContentLoaded", async () => {
