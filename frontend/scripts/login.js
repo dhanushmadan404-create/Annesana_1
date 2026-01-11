@@ -1,6 +1,6 @@
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
   ? 'http://127.0.0.1:8000'
-  : 'https://annesana-1.onrender.com';
+  : 'https://annesana-1.onrender.com/api';
 
 // ---------------- FETCH HELPER ----------------
 async function fetchAPI(endpoint, options = {}) {
