@@ -23,30 +23,36 @@ def save_image(image: UploadFile) -> str:
     return f"/{file_path}"
 
 # ---------------- REGISTER USER ----------------
+# ---------------- REGISTER USER ----------------
 @router.post("/", response_model=UserResponse)
 def register_user(
     name: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
     role: str = Form(...),
-    image: UploadFile = None,
+    image: UploadFile | None = None,
     db: Session = Depends(get_db)
 ):
+    # check existing user
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    image_url = save_image(image) if image else None
+    # save image
+    image_path = save_image(image) if image else None
 
+    # create user
     db_user = User(
         name=name,
         email=email,
-        password=hash_password(password),
+        password_hash=hash_password(password),  # ✅ FIXED
         role=role,
-        image_url=image_url
+        image=image_path                         # ✅ FIXED
     )
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
     return db_user
 
 # ---------------- GET CURRENT USER ----------------
