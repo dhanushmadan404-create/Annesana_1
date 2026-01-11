@@ -1,7 +1,7 @@
 const API_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000/api'
-    : 'https://annesana-1.onrender.com/api';
+  : 'https://annesana-1.onrender.com';
 
 // ---------------- MAP INIT ----------------
 const map = L.map("map").setView([13.0827, 80.2707], 11);

@@ -5,7 +5,7 @@
 const API_URL =
   window.location.hostname === 'localhost'
     ? 'http://127.0.0.1:8000/api'
-    : 'https://annesana-1.onrender.com/api';
+    : 'https://annesana-1.onrender.com';
 
 async function fetchAPI(endpoint, options = {}) {
     const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;

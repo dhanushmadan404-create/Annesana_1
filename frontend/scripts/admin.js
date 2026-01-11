@@ -2,7 +2,7 @@
 const API_URL =
   window.location.hostname === 'localhost'
     ? 'http://127.0.0.1:8000/api'
-    : 'https://annesana-1.onrender.com/api';
+ : 'https://annesana-1.onrender.com';
 const token = localStorage.getItem("token");
 
 // ---------------- LOGOUT ----------------
