@@ -8,11 +8,19 @@ async function fetchAPI(endpoint, options = {}) {
   if (!response.ok) throw new Error(data.detail || "Something went wrong");
   return data;
 }
+function toggleForm(targetFormId) {
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
 
-function visible(show, hide) {
-  document.getElementById(show).classList.add("visible");
-  document.getElementById(hide).classList.remove("visible");
+  if (targetFormId === "loginForm") {
+    loginForm.classList.add("visible");
+    registerForm.classList.remove("visible");
+  } else if (targetFormId === "registerForm") {
+    registerForm.classList.add("visible");
+    loginForm.classList.remove("visible");
+  }
 }
+
 
 // ---------------- REGISTER ----------------
 document.getElementById("append").addEventListener("click", async e => {
