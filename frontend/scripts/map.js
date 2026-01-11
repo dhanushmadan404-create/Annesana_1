@@ -1,23 +1,22 @@
-
 const API_URL =
-  window.location.hostname === 'localhost'
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000/api'
     : 'https://annesana-1.onrender.com/api';
-//  MAP INIT
 
+// ---------------- MAP INIT ----------------
 const map = L.map("map").setView([13.0827, 80.2707], 11);
 
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 20,
 }).addTo(map);
 
-//  ICONS
-
+// ---------------- ICONS ----------------
 const foodIcon = L.icon({
-  iconUrl: "../assets/food.png", // any red marker icon
+  iconUrl: "../assets/food.png",
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
+
 const shopIcon = L.icon({
   iconUrl: "../assets/shop.png",
   iconSize: [40, 40],
@@ -25,33 +24,29 @@ const shopIcon = L.icon({
 });
 
 const userIcon = L.icon({
-  iconUrl: "/assets/3448609.png", // any blue marker icon
+  iconUrl: "/assets/3448609.png",
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
 
-//  GLOBAL STATE
-
+// ---------------- GLOBAL STATE ----------------
 let userLat = null;
 let userLng = null;
 let foodLat = null;
 let foodLng = null;
 let routingControl = null;
 
-//  GET FOOD ID FROM URL
-
+// ---------------- GET FOOD ID FROM URL ----------------
 const params = new URLSearchParams(window.location.search);
 const foodId = Number(params.get("food_id"));
 console.log("Food ID:", foodId);
-// if (!foodId) {
-// alert("Food ID missing");
-// }
 
-//  FETCH FOOD LOCATION
-
+// ---------------- FETCH FOOD LOCATION ----------------
 async function loadFoodLocation() {
+  if (!foodId) return;
+
   try {
-    const res = await fetch(`${API_URL}/foods/location/${foodId}`);
+    const res = await fetch(`${API_URL}/foods/${foodId}`);
     if (!res.ok) throw new Error("Food not found");
 
     const food = await res.json();
@@ -59,10 +54,7 @@ async function loadFoodLocation() {
     foodLat = food.latitude;
     foodLng = food.longitude;
 
-    if (!foodLat || !foodLng) {
-      alert("Food location not available");
-      return;
-    }
+    if (!foodLat || !foodLng) return;
 
     L.marker([foodLat, foodLng], { icon: foodIcon })
       .addTo(map)
@@ -70,15 +62,12 @@ async function loadFoodLocation() {
       .openPopup();
 
     tryRouting();
-
   } catch (err) {
-    console.error(err);
-    // alert("Failed to load food location ❌");
+    console.error("Error loading food location:", err);
   }
 }
 
-//  USER LOCATION
-
+// ---------------- GET USER LOCATION ----------------
 function getUserLocation() {
   if (!navigator.geolocation) {
     alert("Geolocation not supported");
@@ -103,8 +92,7 @@ function getUserLocation() {
   );
 }
 
-//  ROUTING
-
+// ---------------- ROUTING ----------------
 function tryRouting() {
   if (!userLat || !userLng || !foodLat || !foodLng) return;
 
@@ -125,30 +113,29 @@ function tryRouting() {
   }).addTo(map);
 }
 
-
-//  INIT
-getUserLocation();
-loadFoodLocation();
-
-
-document.addEventListener("DOMContentLoaded", async () => {
+// ---------------- LOAD ALL FOOD LOCATIONS ----------------
+async function loadAllFoodLocations() {
   try {
     const res = await fetch(`${API_URL}/foods/locations`);
-
-    if (!res.ok) {
-      throw new Error("Failed to load food locations");
-    }
+    if (!res.ok) throw new Error("Failed to load food locations");
 
     const foods = await res.json();
 
     foods.forEach(food => {
-      L.marker([food.latitude, food.longitude], { icon: shopIcon })
-        .addTo(map)
-        .bindPopup(`<b>${food.food_name}</b>`);
+      if (food.latitude && food.longitude) {
+        L.marker([food.latitude, food.longitude], { icon: shopIcon })
+          .addTo(map)
+          .bindPopup(`<b>${food.food_name}</b>`);
+      }
     });
   } catch (err) {
-    console.error(err.message);
+    console.error("Error loading all food locations:", err);
   }
 }
-);
 
+// ---------------- INIT ----------------
+document.addEventListener("DOMContentLoaded", () => {
+  getUserLocation();
+  loadFoodLocation();
+  loadAllFoodLocations();
+});

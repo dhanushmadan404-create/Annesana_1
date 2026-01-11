@@ -1,11 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Form,
+    File,
+    UploadFile
+)
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import time
-
 import os
-import base64
 import uuid
+import shutil
 
 from database import get_db
 from core.security import get_current_user
@@ -16,42 +22,45 @@ from schemas.vendor import VendorResponse
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 # ================= IMAGE STORAGE =================
-UPLOAD_DIR = "/tmp/uploads"
+UPLOAD_DIR = "uploads/vendors"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def save_base64_image(base64_string: str) -> str:
-    try:
-        _, encoded = base64_string.split(",", 1)
-    except ValueError:
-        encoded = base64_string
-
-    image_bytes = base64.b64decode(encoded)
-    filename = f"{uuid.uuid4().hex}.png"
+def save_image(image: UploadFile) -> str:
+    ext = image.filename.split(".")[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    with open(file_path, "wb") as f:
-        f.write(image_bytes)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
 
-    return f"/uploads/{filename}"
+    return f"/{file_path}"
 
-# ================= CREATE VENDOR =================
+
+# create vendor
 @router.post("", response_model=VendorResponse)
 def create_vendor(
     phone_number: str = Form(...),
     opening_time: time = Form(...),
     closing_time: time = Form(...),
-    cart_image_base64: str = Form(...),
+    image: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if db.query(Vendor).filter(Vendor.user_id == current_user.user_id).first():
-        raise HTTPException(status_code=400, detail="Vendor already exists")
+    if db.query(Vendor).filter(
+        Vendor.user_id == current_user.user_id
+    ).first():
+        raise HTTPException(
+            status_code=400,
+            detail="Vendor already exists"
+        )
+
+    image_url = save_image(image)
 
     vendor = Vendor(
         phone_number=phone_number,
         opening_time=opening_time,
         closing_time=closing_time,
-        cart_image_url=save_base64_image(cart_image_base64),
+        cart_image_url=image_url,
         user_id=current_user.user_id
     )
 
@@ -60,43 +69,61 @@ def create_vendor(
     db.refresh(vendor)
     return vendor
 
-# ================= GET ALL VENDORS =================
+# get all vendors
 @router.get("", response_model=List[VendorResponse])
 def get_all_vendors(db: Session = Depends(get_db)):
     return db.query(Vendor).all()
 
-# ================= GET VENDOR BY ID =================
+
+# get by vendor_id
+
 @router.get("/{vendor_id}", response_model=VendorResponse)
 def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
-    vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    vendor = db.query(Vendor).filter(
+        Vendor.vendor_id == vendor_id
+    ).first()
+
     if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Vendor not found"
+        )
     return vendor
 
-# ================= GET MY VENDOR =================
-@router.get("/me", response_model=VendorResponse)
-def get_my_vendor(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    vendor = db.query(Vendor).filter(Vendor.user_id == current_user.user_id).first()
+
+# get by user id/
+@router.get("/user/{user_id}", response_model=VendorResponse)
+def get_vendor_by_user(user_id: int, db: Session = Depends(get_db)):
+    vendor = db.query(Vendor).filter(
+        Vendor.user_id == user_id
+    ).first()
+
     if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Vendor with user_id {user_id} not found"
+        )
     return vendor
 
-# ================= UPDATE VENDOR =================
+# update vendor
 @router.put("", response_model=VendorResponse)
 def update_vendor(
     phone_number: str | None = Form(None),
     opening_time: time | None = Form(None),
     closing_time: time | None = Form(None),
-    cart_image_base64: str | None = Form(None),
+    image: UploadFile | None = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    vendor = db.query(Vendor).filter(Vendor.user_id == current_user.user_id).first()
+    vendor = db.query(Vendor).filter(
+        Vendor.user_id == current_user.user_id
+    ).first()
+
     if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Vendor not found"
+        )
 
     if phone_number:
         vendor.phone_number = phone_number
@@ -104,22 +131,28 @@ def update_vendor(
         vendor.opening_time = opening_time
     if closing_time:
         vendor.closing_time = closing_time
-    if cart_image_base64:
-        vendor.cart_image_url = save_base64_image(cart_image_base64)
+    if image:
+        vendor.cart_image_url = save_image(image)
 
     db.commit()
     db.refresh(vendor)
     return vendor
 
-# ================= DELETE VENDOR =================
+# delete vendor
 @router.delete("")
 def delete_vendor(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    vendor = db.query(Vendor).filter(Vendor.user_id == current_user.user_id).first()
+    vendor = db.query(Vendor).filter(
+        Vendor.user_id == current_user.user_id
+    ).first()
+
     if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Vendor not found"
+        )
 
     db.delete(vendor)
     db.commit()

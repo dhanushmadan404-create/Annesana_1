@@ -10,7 +10,7 @@ const vendorName = document.getElementById("vendor_details");
 const TimeStatus = document.getElementById("timeStatus");
 const food_container = document.getElementById("food_container");
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", async () => {;
   if (!token) return window.location.href = "./login.html";
 
   try {
@@ -34,7 +34,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
 
     // 2️⃣ Get vendor-specific info
-    const vendorDetails = JSON.parse(localStorage.getItem("vendor_details"));
+    try{
+    let vendor=localStorage.getItem("vendor");
+    const vendorDetails = await fetch(`${API_URL}/vendors/user/${vendor.user_id}`);
+      vendorDetails= await vendorDetails.json();
     if (vendorDetails) {
       TimeStatus.textContent = `${vendorDetails.opening_time} - ${vendorDetails.closing_time}`;
 
@@ -65,13 +68,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Vendor load error:", error);
     alert("Failed to load vendor profile ❌");
   }
+} catch (error) {
+    console.error("Vendor load error:", error);
+    alert("Failed to load vendor profile ❌");
+  }
 });
 
 function logout() {
   localStorage.clear();
   window.location.href = "./login.html";
 }
-
 async function deleteFood(foodId) {
   if (!foodId || !confirm("Are you sure you want to delete this food item?")) return;
 
@@ -79,17 +85,21 @@ async function deleteFood(foodId) {
     const res = await fetch(`${API_URL}/foods/${foodId}/`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${token}`
       }
     });
 
-    if (!res.ok) throw new Error("Delete failed");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Delete failed");
+    }
 
     alert("Food deleted successfully ✅");
-    location.reload();
+    // Optionally remove row from table dynamically instead of reload
+    const row = document.querySelector(`#foodTable button[data-id='${foodId}']`)?.closest("tr");
+    if (row) row.remove();
   } catch (err) {
     console.error("Delete error:", err);
-    alert("Error deleting food ❌");
+    alert(`Error deleting food ❌: ${err.message}`);
   }
 }

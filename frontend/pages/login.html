@@ -3,86 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="../styles/login.css" />
-  <link rel="icon" href="../assets/icons8-a-64.png" />
-  <title>Login / Register - Annesana</title>
+  <title>Login / Register</title>
+  <link rel="stylesheet" href="../../frontend/styles/login.css" />
 </head>
 
 <body>
-  <header>
-    <div class="header_container">
-      <img
-        class="logo"
-        src="../assets/annesana.png"
-        alt="Annesana"
-        onclick="window.location.href='/index.html'"
-      />
-    </div>
-  </header>
+<header>
+  <h2 class="logo">ANNESALA</h2>
+</header>
 
-  <main>
-    <!-- LOGIN -->
-    <form id="loginForm" class="form visible">
-      <h1>Login</h1>
+<main>
 
-      <label>Email</label>
-      <input id="email" type="text" required />
-      <label id="loginEmail"></label>
+  <!-- LOGIN FORM -->
+  <form id="loginForm" class="form visible">
+    <h1>Login</h1>
 
-      <label>Password</label>
-      <input id="password" type="password" required />
-      <label id="loginPassword"></label>
+    <label>Email</label>
+    <input id="loginEmail" type="email" />
+    <span class="error" id="loginEmailError"></span>
 
-      <button type="button" id="check">Login</button>
+    <label>Password</label>
+    <input id="loginPassword" type="password" />
+    <span class="error" id="loginPasswordError"></span>
 
-      <h4>
-        You don't have an account?
-        <a href="#" onclick="event.preventDefault(); visible('registerForm','loginForm')">
-          Register
-        </a>
-      </h4>
-    </form>
+    <button type="button" id="loginBtn">Login</button>
 
-    <!-- REGISTER -->
-    <form id="registerForm" class="form">
-      <h1>Register</h1>
+    <p class="switch">
+      Don’t have an account?
+      <button type="button" class="link-btn"
+        onclick="toggleForm('registerForm')">Register</button>
+    </p>
+  </form>
 
-      <label>Name</label>
-      <input id="name" type="text" required />
-      <label id="nameError"></label>
+  <!-- REGISTER FORM -->
+  <form id="registerForm" class="form">
+    <h1>Register</h1>
 
-      <label>Email</label>
-      <input id="registrationEmail" type="text" required />
-      <label id="emailError"></label>
+    <label>Name</label>
+    <input id="name" type="text" />
+    <span class="error" id="nameError"></span>
 
-      <label>Password</label>
-      <input id="registrationPassword" type="password" required />
-      <label id="passwordError"></label>
+    <label>Email</label>
+    <input id="regEmail" type="email" />
+    <span class="error" id="emailError"></span>
 
-      <label>Role</label>
-      <select id="role">
-        <option value="">Select role</option>
-        <option value="user">User</option>
-        <option value="vendor">Vendor</option>
-      </select>
-      <label id="roleError"></label>
+    <label>Password</label>
+    <input id="regPassword" type="password" />
+    <span class="error" id="passwordError"></span>
 
-      <label>Profile Image</label>
-      <input id="image" type="file" accept="image/*" />
-      <label id="imageError"></label>
+    <label>Role</label>
+    <select id="role">
+      <option value="">Select role</option>
+      <option value="user">User</option>
+      <option value="vendor">Vendor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <span class="error" id="roleError"></span>
+    <label for="img">Profile Image</label>
+    <input type="file" id="img" accept="image/*">
+    <label class="error" for="img"></label>
 
-      <button type="button" id="append">Register</button>
+    <button type="button" id="registerBtn">Register</button>
 
-      <h4>
-        Already have an account?
-        <a href="#" onclick="event.preventDefault(); visible('loginForm','registerForm')">
-          Login
-        </a>
-      </h4>
-    </form>
-  </main>
+    <p class="switch">
+      Already have an account?
+      <button type="button" class="link-btn"
+        onclick="toggleForm('loginForm')">Login</button>
+    </p>
+  </form>
 
-  <script src="../scripts/api-helper.js"></script>
-  <script src="../scripts/login.js"></script>
+</main>
+
+<script src="../scripts/login.js"></script>
 </body>
 </html>

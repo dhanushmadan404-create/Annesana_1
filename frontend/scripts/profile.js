@@ -4,6 +4,7 @@ const API_URL =
     : 'https://annesana-1.onrender.com/api';
 const token = localStorage.getItem("token");
 
+// ---------------- LOAD PROFILE ----------------
 document.addEventListener("DOMContentLoaded", async () => {
   if (!token) {
     location.href = "./login.html";
@@ -12,7 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const profile = document.getElementById("profile_details");
   try {
-    // We now use /users/me which is protected by the token
     const res = await fetch(`${API_URL}/users/me`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
@@ -27,18 +27,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem("user_details", JSON.stringify(user_details));
 
     profile.innerHTML = `
-         <img src="${user_details.image || '../assets/default.png'}" alt="${user_details.name}" class="profile-image" />
-          <br />
-          <h2>${user_details.name}</h2>
-          <p class="about">${user_details.email}</p>
-          <p><strong>Role:</strong> ${user_details.role}</p>
-      `;
+      <img src="${user_details.image_url || '../assets/default.png'}" alt="${user_details.name}" class="profile-image" />
+      <br />
+      <h2>${user_details.name}</h2>
+      <p class="about">${user_details.email}</p>
+      <p><strong>Role:</strong> ${user_details.role}</p>
+    `;
   } catch (err) {
     console.error("Profile load error:", err);
     alert("Connection error ❌");
   }
 });
 
+// ---------------- EDIT PROFILE ----------------
 const editBtn = document.getElementById("editBtn");
 const user_edit = document.getElementById("edit");
 
@@ -46,7 +47,7 @@ editBtn.addEventListener("click", () => {
   const user_document = JSON.parse(localStorage.getItem("user_details") || "{}");
 
   user_edit.innerHTML = `
-    <form id="editForm">
+    <form id="editForm" enctype="multipart/form-data">
       <label>Name</label>
       <input 
         type="text" 
@@ -63,24 +64,16 @@ editBtn.addEventListener("click", () => {
         accept="image/*"
       />
 
-      <img src="${user_document.image || ''}" width="80" id="preview" style="display: block; margin-top: 10px;"/>
+      <img src="${user_document.image_url || ''}" width="80" id="preview" style="display: block; margin-top: 10px;"/>
 
       <button type="submit">Update Profile</button>
     </form>
-    `;
+  `;
 
   document.getElementById("editForm").addEventListener("submit", submitEditForm);
 });
 
-function getBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
-}
-
+// ---------------- SUBMIT EDIT FORM ----------------
 async function submitEditForm(e) {
   e.preventDefault();
   const name = document.getElementById("name").value.trim();
@@ -88,16 +81,14 @@ async function submitEditForm(e) {
 
   const formData = new FormData();
   if (name) formData.append("name", name);
-
-  if (imageFile) {
-    const image_base64 = await getBase64(imageFile);
-    formData.append("image_base64", image_base64);
-  }
+  if (imageFile) formData.append("image", imageFile); // ✅ send file directly
 
   try {
-    const res = await fetch(`${API_URL}/users/profile`, {
+    const res = await fetch(`${API_URL}/users/email/${JSON.parse(localStorage.getItem("user_details")).email}`, {
       method: "PUT",
-      headers: { "Authorization": `Bearer ${token}` },
+      headers: {
+        "Authorization": `Bearer ${token}` // DO NOT set Content-Type for FormData
+      },
       body: formData
     });
 
@@ -116,7 +107,7 @@ async function submitEditForm(e) {
   }
 }
 
-// Log out
+// ---------------- LOGOUT ----------------
 const logoutBtn = document.querySelector("a[href='#']");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", (e) => {
