@@ -1,13 +1,16 @@
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'http://127.0.0.1:8000' 
+  ? 'http://127.0.0.1:8000'
   : 'https://annesana-1.onrender.com';
 
+// ---------------- FETCH HELPER ----------------
 async function fetchAPI(endpoint, options = {}) {
   const response = await fetch(`${API_URL}${endpoint}`, options);
   const data = await response.json();
   if (!response.ok) throw new Error(data.detail || "Something went wrong");
   return data;
 }
+
+// ---------------- TOGGLE FORMS ----------------
 function toggleForm(targetFormId) {
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
@@ -21,83 +24,90 @@ function toggleForm(targetFormId) {
   }
 }
 
-
 // ---------------- REGISTER ----------------
-document.getElementById("append").addEventListener("click", async e => {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  const registerBtn = document.getElementById("registerBtn");
+  const loginBtn = document.getElementById("loginBtn");
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("registrationEmail").value.trim();
-  const password = document.getElementById("registrationPassword").value.trim();
-  const role = document.getElementById("role").value;
-  const imageFile = document.getElementById("image").files[0];
+  // Register
+  registerBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-  const nameError = document.getElementById("nameError");
-  const emailError = document.getElementById("emailError");
-  const passwordError = document.getElementById("passwordError");
-  const roleError = document.getElementById("roleError");
-  const imageError = document.getElementById("imageError");
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value.trim();
+    const role = document.getElementById("role").value;
+    const imageFile = document.getElementById("img").files[0];
 
-  [nameError,emailError,passwordError,roleError,imageError].forEach(el => el.textContent="");
+    const nameError = document.getElementById("nameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const roleError = document.getElementById("roleError");
+    const imageError = document.querySelector("label[for='img'].error");
 
-  let valid = true;
-  if(name.length<3){nameError.textContent="Name min 3 chars"; valid=false;}
-  if(!/\S+@\S+\.\S+/.test(email)){emailError.textContent="Invalid email"; valid=false;}
-  if(password.length<6){passwordError.textContent="Password min 6 chars"; valid=false;}
-  if(!role){roleError.textContent="Select role"; valid=false;}
-  if(!imageFile){imageError.textContent="Profile image required"; valid=false;}
-  if(!valid) return;
+    [nameError,emailError,passwordError,roleError,imageError].forEach(el => el.textContent = "");
 
-  try{
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("password", password);
-    formData.append("role", role);
-    formData.append("image", imageFile); // ✅ Method 1 file upload
+    let valid = true;
+    if(name.length < 3){ nameError.textContent = "Name min 3 chars"; valid = false; }
+    if(!/\S+@\S+\.\S+/.test(email)){ emailError.textContent = "Invalid email"; valid = false; }
+    if(password.length < 6){ passwordError.textContent = "Password min 6 chars"; valid = false; }
+    if(!role){ roleError.textContent = "Select role"; valid = false; }
+    if(!imageFile){ imageError.textContent = "Profile image required"; valid = false; }
+    if(!valid) return;
 
-    await fetchAPI(`/users`, {
-      method: "POST",
-      body: formData // send as multipart/form-data
-    });
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("role", role);
+      formData.append("image", imageFile); // Method 1 file upload
 
-    alert("Registration successful ✅");
-    visible("loginForm","registerForm");
-  }catch(err){
-    alert(err.message);
-  }
-});
+      await fetchAPI("/users", { method: "POST", body: formData });
 
-
-// ---------------- LOGIN ----------------
-document.getElementById("check").addEventListener("click", async e=>{
-  e.preventDefault();
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value.trim();
-
-  const emailError=document.getElementById("loginEmailError");
-  const passwordError=document.getElementById("loginPasswordError");
-
-  emailError.textContent="";
-  passwordError.textContent="";
-
-  if(!email){emailError.textContent="Email required"; return;}
-  if(!password){passwordError.textContent="Password required"; return;}
-
-  try{
-    const data=await fetchAPI("/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
-
-    localStorage.setItem("token",data.access_token);
-    localStorage.setItem(`${data.role}`,data);
-    // it;s for all
-
-    // Role-based navigation
-    if(data.role==="user") location.href="../../index.html";
-    else if(data.role==="admin") location.href="./admin.html";
-    else if(data.role==="vendor"){
-      const checkData = await fetchAPI(`/vendors/user/${data.user_id}`);
-      location.href = checkData.exists ? "./vendor-profile.html" : "./vendor-register.html";
+      alert("Registration successful ✅");
+      toggleForm("loginForm");
+    } catch (err) {
+      alert(err.message);
     }
+  });
 
-  }catch(err){passwordError.textContent=err.message;}
+  // Login
+  loginBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    const emailError = document.getElementById("loginEmailError");
+    const passwordError = document.getElementById("loginPasswordError");
+
+    emailError.textContent = "";
+    passwordError.textContent = "";
+
+    if(!email){ emailError.textContent = "Email required"; return; }
+    if(!password){ passwordError.textContent = "Password required"; return; }
+
+    try {
+      const data = await fetchAPI("/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem(`${data.role}`, JSON.stringify(data));
+
+      // Role-based navigation
+      if(data.role === "user") location.href = "../../index.html";
+      else if(data.role === "admin") location.href = "./admin.html";
+      else if(data.role === "vendor") {
+        const checkData = await fetchAPI(`/vendors/user/${data.user_id}`);
+        location.href = checkData.exists ? "./vendor-profile.html" : "./vendor-register.html";
+      }
+
+    } catch (err) {
+      passwordError.textContent = err.message;
+    }
+  });
 });
