@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!password){ passwordError.textContent = "Password required"; return; }
 
     try {
-      const data = await fetchAPI(`${API_URL}/auth/login`, {
+      const data = await fetchAPI(`/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
