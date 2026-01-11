@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(data.role === "user") location.href = "../../index.html";
       else if(data.role === "admin") location.href = "./admin.html";
       else if(data.role === "vendor") {
+        console.log("Vendor login detected");
         const checkData = await fetchAPI(`/vendors/user/${data.user_id}`);
         location.href = checkData.exists ? "./vendor-profile.html" : "./vendor-register.html";
       }

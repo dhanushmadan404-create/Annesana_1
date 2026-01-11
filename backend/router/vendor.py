@@ -19,7 +19,7 @@ from models.user import User
 from models.vendor import Vendor
 from schemas.vendor import VendorResponse
 
-router = APIRouter(prefix="api/vendors", tags=["Vendors"])
+router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 # ================= IMAGE STORAGE =================
 UPLOAD_DIR = "uploads/vendors"
