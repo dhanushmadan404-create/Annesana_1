@@ -1,6 +1,6 @@
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'http://127.0.0.1:8000'
-  : 'https://annesana-1.onrender.com/api';
+  const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:8000'
+    : 'https://annesana-1.onrender.com/api';
 
 // ---------------- FETCH HELPER ----------------
 async function fetchAPI(endpoint, options = {}) {
@@ -103,10 +103,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if(data.role === "user") location.href = "../../index.html";
       else if(data.role === "admin") location.href = "./admin.html";
       else if(data.role === "vendor") {
-        console.log("Vendor login detected");
-        const checkData = await fetchAPI(`/vendors/user/${data.user_id}`);
-        location.href = checkData.exists ? "./vendor-profile.html" : "./vendor-register.html";
-      }
+  console.log("Vendor login detected");
+  const checkData = await fetchAPI(`/vendors/user/${data.user_id}`);
+  location.href = checkData.exists
+    ? "./vendor-profile.html"
+    : "./vendor-register.html";
+}
+
 
     } catch (err) {
       passwordError.textContent = err.message;

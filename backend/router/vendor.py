@@ -21,6 +21,7 @@ from schemas.vendor import VendorResponse
 
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
+
 # ================= IMAGE STORAGE =================
 UPLOAD_DIR = "uploads/vendors"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -75,31 +76,20 @@ def get_all_vendors(db: Session = Depends(get_db)):
     return db.query(Vendor).all()
 
 
-# get by vendor_id
-
-@router.get("/{vendor_id}", response_model=VendorResponse)
-def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
-    vendor = db.query(Vendor).filter(
-        Vendor.vendor_id == vendor_id
-    ).first()
-
-    if not vendor:
-        raise HTTPException(
-            status_code=404,
-            detail="Vendor not found"
-        )
-    return vendor
-
-
-# get by user id/
-
+# get by user id
 @router.get("/user/{user_id}")
 def check_vendor_by_user(user_id: int, db: Session = Depends(get_db)):
     vendor = db.query(Vendor).filter(Vendor.user_id == user_id).first()
+    return {"exists": vendor is not None}
 
-    return {
-        "exists": vendor is not None
-    }
+# vendor id
+@router.get("/{vendor_id}", response_model=VendorResponse)
+def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
+    vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return vendor
+
 
 # update vendor
 @router.put("", response_model=VendorResponse)
