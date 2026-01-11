@@ -92,18 +92,14 @@ def get_vendor(vendor_id: int, db: Session = Depends(get_db)):
 
 
 # get by user id/
-@router.get("/user/{user_id}", response_model=VendorResponse)
-def get_vendor_by_user(user_id: int, db: Session = Depends(get_db)):
-    vendor = db.query(Vendor).filter(
-        Vendor.user_id == user_id
-    ).first()
 
-    if not vendor:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Vendor with user_id {user_id} not found"
-        )
-    return vendor
+@router.get("/user/{user_id}")
+def check_vendor_by_user(user_id: int, db: Session = Depends(get_db)):
+    vendor = db.query(Vendor).filter(Vendor.user_id == user_id).first()
+
+    return {
+        "exists": vendor is not None
+    }
 
 # update vendor
 @router.put("", response_model=VendorResponse)

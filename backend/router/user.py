@@ -23,7 +23,6 @@ def save_image(image: UploadFile) -> str:
     return f"/{file_path}"
 
 # ---------------- REGISTER USER ----------------
-# ---------------- REGISTER USER ----------------
 @router.post("/", response_model=UserResponse)
 def register_user(
     name: str = Form(...),
