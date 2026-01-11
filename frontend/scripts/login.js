@@ -85,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     emailError.textContent = "";
     passwordError.textContent = "";
 
+
     if(!email){ emailError.textContent = "Email required"; return; }
     if(!password){ passwordError.textContent = "Password required"; return; }
 
