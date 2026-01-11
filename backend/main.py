@@ -1,5 +1,12 @@
 import sys
 import os
+import logging
+
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 
 # ---------------- PATH FIX ----------------
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -8,19 +15,13 @@ if current_dir not in sys.path:
 
 # ---------------- IMPORT ROUTERS ----------------
 from router import auth, user, vendor, food
-
-# ---------------- APP SETUP ----------------
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.exceptions import RequestValidationError
-import logging
 from database import init_db
 
+# ---------------- LOGGING ----------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ---------------- APP SETUP ----------------
 app = FastAPI(title="Annesana API", version="1.0.0")
 
 # ---------------- EXCEPTIONS ----------------
@@ -40,15 +41,23 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ---------------- CORS ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://silly-custard-b54606.netlify.app",  # your frontend
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ---------------- STATIC FILES ----------------
-UPLOAD_DIR = "/tmp/uploads"
+# ---------------- STATIC FILES / UPLOADS ----------------
+# Save uploaded images in a persistent folder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Mount static files for access via /uploads/<filename>
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # ---------------- ROUTERS ----------------
@@ -58,7 +67,7 @@ app.include_router(user.router, prefix=API_PREFIX)
 app.include_router(vendor.router, prefix=API_PREFIX)
 app.include_router(food.router, prefix=API_PREFIX)
 
-# ---------------- HEALTH ----------------
+# ---------------- HEALTH CHECK ----------------
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "service": "Annesana Backend"}
